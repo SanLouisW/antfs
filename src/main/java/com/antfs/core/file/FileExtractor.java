@@ -90,9 +90,13 @@ public class FileExtractor {
 		calculateReadPointer(end+1, size);
 	}
 
+	/**
+	 * start the service
+	 */
 	public void start(){
 		// prepare the read pointer
 		calculateReadPointer(0, this.bufferSize);
+		LogUtil.info("readPointers=%s",readPointers);
 		// handle AntMetaObject
 		handleMeta(this.antMetaObject);
 
@@ -100,8 +104,10 @@ public class FileExtractor {
 		cyclicBarrier = new CyclicBarrier(readPointers.size(),new Runnable() {
 			@Override
 			public void run() {
-				System.out.println("use time: "+(System.currentTimeMillis()-startTime));
-				System.out.println("all line: "+counter.get());
+				// all Reader has finished
+				LogUtil.info("file split into antObjects number=(%d)",counter.get());
+				LogUtil.info("total cost time=(%dms)",(System.currentTimeMillis()-startTime));
+				shutdown();
 			}
 		});
 		for(ReadPointer readPointer: readPointers){
@@ -109,8 +115,11 @@ public class FileExtractor {
 		}
 	}
 
-	
+	/**
+	 * shutdown
+	 */
 	public void shutdown(){
+		LogUtil.info("all Reader has finished,will shutdown");
 		try {
 			this.randomAccessFile.close();
 		} catch (IOException e) {
@@ -121,10 +130,12 @@ public class FileExtractor {
 
 
 	private void handleMeta(AntMetaObject antMetaObject){
+		LogUtil.info("handle antMetaObject=%s",antMetaObject);
 		this.handle.storeMeta(antMetaObject);
 	}
 
 	private void handleObject(AntObject antObject){
+		LogUtil.info("handle antObject=%s",antObject);
 		this.handle.store(antObject);
 		counter.incrementAndGet();
 	}
@@ -167,7 +178,7 @@ public class FileExtractor {
 
 		@Override
 		public String toString() {
-			return "{start:"+this.start+",end:"+this.end+",oid:"+this.oid+"}";
+			return "{start:"+this.start+",end:"+this.end+"}";
 		}
 	}
 
@@ -189,7 +200,6 @@ public class FileExtractor {
 			this.start = readPointer.start;
 			this.size = readPointer.end-readPointer.start+1;
 			this.oid = readPointer.oid;
-			LogUtil.info("readPointer=%s",readPointer);
 			this.readBuff = new byte[bufferSize];
 		}
 
@@ -200,8 +210,12 @@ public class FileExtractor {
 				MappedByteBuffer mapBuffer = randomAccessFile.getChannel().map(MapMode.READ_ONLY,this.start,this.size);
 				bos = new ByteArrayOutputStream();
 				mapBuffer.get(this.readBuff, 0, (int)this.size);
-				handleObject(new AntObject(fid,this.oid,this.readBuff));
-
+				for(int i=0;i<this.size;i++){
+					byte b = this.readBuff[i];
+					bos.write(b);
+				}
+				LogUtil.info("read finished with start=%d,size=%d,oid=%s",start,size,oid);
+				handleObject(new AntObject(fid,this.oid,bos.toByteArray()));
 				cyclicBarrier.await();
 			}catch (Exception e) {
 				e.printStackTrace();

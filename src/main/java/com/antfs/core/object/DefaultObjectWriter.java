@@ -21,6 +21,10 @@ public class DefaultObjectWriter extends DefaultObjectHandler implements ObjectW
     private void store(String storePath,String storeFileName,Object object){
         ObjectOutputStream os = null;
         try {
+            File storeDir = new File(storePath);
+            if(!storeDir.exists()){
+                storeDir.mkdirs();
+            }
             os = new ObjectOutputStream(new FileOutputStream(storePath+File.separator+storeFileName));
             os.writeObject(object);
         } catch (IOException e) {

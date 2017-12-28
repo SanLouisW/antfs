@@ -17,5 +17,5 @@ repositories {
 dependencies {
     compile group: 'commons-codec', name: 'commons-codec', version: '1.4'
     compile group: 'io.netty', name: 'netty-all', version:'4.1.9.Final'
-    testCompile group: 'junit', name: 'junit', version: '4.12',transitive:false
+    testCompile group: 'junit', name: 'junit', version: '4.12'
 }

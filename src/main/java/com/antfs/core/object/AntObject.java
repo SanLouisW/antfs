@@ -56,4 +56,10 @@ public class AntObject implements Serializable{
     public void setContent(byte[] content) {
         this.content = content;
     }
+
+    @Override
+    public String toString() {
+        return new StringBuilder().append("{fid:").append(fid)
+                                  .append(",oid:").append(oid).append("}").toString();
+    }
 }

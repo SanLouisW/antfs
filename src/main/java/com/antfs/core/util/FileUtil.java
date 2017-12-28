@@ -1,5 +1,6 @@
 package com.antfs.core.util;
 
+import com.antfs.core.common.Constants;
 import io.netty.util.CharsetUtil;
 import org.apache.commons.codec.digest.DigestUtils;
 
@@ -147,6 +148,9 @@ public class FileUtil {
      * @return the digest result
      */
     private static String getDigest(File file,String algorithm){
+        if(file==null || !file.exists() || file.isDirectory()){
+            return null;
+        }
         FileInputStream is = null;
         FileChannel channel = null;
         MessageDigest digest = null;
@@ -156,7 +160,7 @@ public class FileUtil {
             digest = MessageDigest.getInstance(algorithm);
             MappedByteBuffer byteBuffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, file.length());
             digest.update(byteBuffer);
-            return DigestUtils.md5Hex(digest.digest()).toUpperCase();
+            return DigestUtils.md5Hex(digest.digest()).toLowerCase();
         }catch (IOException | NoSuchAlgorithmException e){
             e.printStackTrace();
         }finally {
@@ -202,6 +206,9 @@ public class FileUtil {
      * @return the file crc32 result
      */
     public static String getCRC32(File file){
+        if(file==null || !file.exists() || file.isDirectory()){
+            return null;
+        }
         CRC32 crc32 = new CRC32();
         InputStream is = null;
         byte[] bytes = new byte[1024];
@@ -222,7 +229,7 @@ public class FileUtil {
                 }
             }
         }
-        return DigestUtils.md5Hex(Long.toHexString(crc32.getValue()+getFileLength(file))).toUpperCase();
+        return DigestUtils.md5Hex(Long.toHexString(crc32.getValue()+getFileLength(file))).toLowerCase();
     }
 
 
@@ -230,8 +237,14 @@ public class FileUtil {
         String filePath = "/Users/wanghui/Downloads/2017alitech_01.pdf";
         File file = new File(filePath);
         long len = getFileLength(file);
-        Capacity capacity = Capacity.MB;
-        LogUtil.info("len=%f(%s)",byteTransfer(capacity,len).floatValue(),capacity);
+        LogUtil.info("len= (%d)",len);
+        int bufferSize = Constants.ANT_OBJECT_BUFFER_SIZE;
+        int num = (int)(len/bufferSize);
+        int num2 = (int)Math.ceil((double)len/bufferSize);
+        int mod = (int)(len%bufferSize);
+        LogUtil.info("num= (%d)",num);
+        LogUtil.info("num2=(%d)",num2);
+        LogUtil.info("mod= (%d)",mod);
 
         String crc = FileUtil.getCRC32(file);
         String md5 = FileUtil.getMD5(file);

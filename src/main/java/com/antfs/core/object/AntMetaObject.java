@@ -1,7 +1,8 @@
 package com.antfs.core.object;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * each file has a AntMetaObject
@@ -59,5 +60,12 @@ public class AntMetaObject implements Serializable{
             oids = new TreeSet<>();
         }
         oids.add(oid);
+    }
+
+    @Override
+    public String toString() {
+        return new StringBuilder().append("{fid:").append(fid)
+                                  .append(",fileName:").append(fileName)
+                                  .append(",oids:").append(String.join(",",oids)).append("}").toString();
     }
 }
