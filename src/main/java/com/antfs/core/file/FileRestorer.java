@@ -8,6 +8,7 @@ import com.antfs.core.util.LogUtil;
 import io.netty.util.concurrent.DefaultThreadFactory;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.concurrent.*;
@@ -52,45 +53,28 @@ public class FileRestorer {
 	 * start to restore the file
 	 */
 	public File restore(){
-		File file;
-		RandomAccessFile accessFile = null;
-		try {
-			File restoreDir = new File(Constants.FILE_RESTORE_PATH);
-			if (!restoreDir.exists()) {
-				restoreDir.mkdirs();
-			}
-			file = new File(Constants.FILE_RESTORE_PATH+File.separator+this.antMetaObject.getFileName());
-			if(file.exists()){
-				file.delete();
-			}
-			accessFile = new RandomAccessFile(file,"rw");
-
-			long startTime = System.currentTimeMillis();
-			for(String oid : antMetaObject.getOids()){
-				this.executorService.execute(new AntObjectReader(accessFile,oid));
-			}
-			try {
-				// wait for all AntObjectReader finish their job
-				latch.await();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			// all AntObjectReader has finished
-			LogUtil.info("total cost time=(%dms)",(System.currentTimeMillis()-startTime));
-			shutdown();
-			return file;
-		}catch(IOException e){
-			LogUtil.error("restore error,cause:%s",e);
-		}finally {
-			if(accessFile!=null){
-				try {
-					accessFile.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
+		File restoreDir = new File(Constants.FILE_RESTORE_PATH);
+		if (!restoreDir.exists() && restoreDir.mkdirs()) {
+			LogUtil.info("create restore directory=(%s)",restoreDir.getAbsolutePath());
 		}
-		return null;
+		File file = new File(Constants.FILE_RESTORE_PATH+File.separator+this.antMetaObject.getFileName());
+		if(file.exists() && file.delete()){
+			LogUtil.info("deleted exists file=(%s)",file.getAbsolutePath());
+		}
+		long startTime = System.currentTimeMillis();
+		for(String oid : antMetaObject.getOids()){
+			this.executorService.execute(new AntObjectReader(file,oid));
+		}
+		try {
+			// wait for all AntObjectReader finish their job
+			latch.await();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		// all AntObjectReader has finished
+		LogUtil.info("total cost time=(%dms)",(System.currentTimeMillis()-startTime));
+		shutdown();
+		return file;
 	}
 
 	/**
@@ -109,17 +93,21 @@ public class FileRestorer {
 
 	private class AntObjectReader implements Runnable{
 
-		private RandomAccessFile accessFile;
+		private RandomAccessFile randomAccessFile;
 
 		private String oid;
 
 		/**
 		 * AntObjectReader
-		 * @param accessFile the BufferedOutputStream
+		 * @param file the file
 		 * @param oid the object id
 		 */
-		AntObjectReader(RandomAccessFile accessFile, String oid) {
-			this.accessFile = accessFile;
+		AntObjectReader(File file, String oid) {
+			try {
+				this.randomAccessFile = new RandomAccessFile(file,"rw");
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
 			this.oid = oid;
 		}
 
@@ -129,8 +117,8 @@ public class FileRestorer {
 				AntObject antObject = objectReader.read(fid,this.oid);
 				if(antObject!=null){
 					long offset = antObject.getBitStart();
-					accessFile.seek(offset);
-					accessFile.write(antObject.getContent());
+					this.randomAccessFile.seek(offset);
+					this.randomAccessFile.write(antObject.getContent());
 					LogUtil.info("antObject read finished with antObject=%s",antObject);
 				}else{
 					LogUtil.error("antObject read from disk is null,with fid=(%s),oid=(%s)",fid,this.oid);
@@ -138,6 +126,13 @@ public class FileRestorer {
 			}catch (Exception e) {
 				e.printStackTrace();
 			}finally {
+				if(this.randomAccessFile!=null){
+					try {
+						this.randomAccessFile.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
 				latch.countDown();
 			}
 		}
