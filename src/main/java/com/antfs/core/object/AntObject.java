@@ -88,6 +88,8 @@ public class AntObject implements Serializable{
     @Override
     public String toString() {
         return new StringBuilder().append("{fid:").append(fid)
-                                  .append(",oid:").append(oid).append("}").toString();
+                                  .append(",oid:").append(oid)
+                                  .append(",start:").append(bitStart)
+                                  .append(",end:").append(bitEnd).append("}").toString();
     }
 }

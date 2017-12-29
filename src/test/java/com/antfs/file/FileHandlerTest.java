@@ -43,6 +43,7 @@ public class FileHandlerTest {
     }
 
     public static void main(String[] args){
+//        testStore();
         testRestore();
     }
 

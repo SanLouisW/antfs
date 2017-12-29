@@ -31,6 +31,8 @@ public class FileStorer {
 
 	private int bufferSize;
 
+	private int threadSize;
+
 	private RandomAccessFile randomAccessFile;
 
 	private ExecutorService  executorService;
@@ -48,14 +50,14 @@ public class FileStorer {
 		this.fid = fid;
 		this.objectHandler = objectHandler;
 		this.bufferSize = bufferSize;
-		int threadSize = (int)Math.ceil((double)this.fileLength/this.bufferSize);
+		this.threadSize = (int)Math.ceil((double)this.fileLength/this.bufferSize);
 		try {
 			this.randomAccessFile = new RandomAccessFile(file,"r");
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
-		ThreadFactory threadFactory = new DefaultThreadFactory("pool-thread-%d");
-		this.executorService = new ThreadPoolExecutor(threadSize,100,0L,TimeUnit.MILLISECONDS,
+		ThreadFactory threadFactory = new DefaultThreadFactory("store-pool-thread-%d");
+		this.executorService = new ThreadPoolExecutor(this.threadSize,100,0L,TimeUnit.MILLISECONDS,
 										new LinkedBlockingDeque<>(1024),
 										threadFactory,
 										new ThreadPoolExecutor.AbortPolicy());
@@ -131,30 +133,30 @@ public class FileStorer {
 	public void start(){
 		// prepare the read pointer
 		calculateReadPointer(0, this.bufferSize);
-		LogUtil.info("readPointers=%s",readPointers);
+		LogUtil.info("readPointers=%s",this.readPointers);
 		// listener AntMetaObject
 		handleMeta(this.antMetaObject);
 
 		final long startTime = System.currentTimeMillis();
-		cyclicBarrier = new CyclicBarrier(readPointers.size(),new Runnable() {
+		cyclicBarrier = new CyclicBarrier(this.threadSize,new Runnable() {
 			@Override
 			public void run() {
-				// all Reader has finished
+				// all FileReader has finished
 				LogUtil.info("split file into (%d) antObjects",counter.get());
 				LogUtil.info("total cost time=(%dms)",(System.currentTimeMillis()-startTime));
 				shutdown();
 			}
 		});
-		for(ReadPointer readPointer: readPointers){
-			this.executorService.execute(new Reader(readPointer));
+		for(ReadPointer readPointer: this.readPointers){
+			this.executorService.execute(new FileReader(readPointer));
 		}
 	}
 
 	/**
 	 * shutdown
 	 */
-	public void shutdown(){
-		LogUtil.info("all Reader has finished,will shutdown");
+	private void shutdown(){
+		LogUtil.info("all readPointers have finished,will shutdown");
 		try {
 			this.randomAccessFile.close();
 		} catch (IOException e) {
@@ -208,19 +210,19 @@ public class FileStorer {
 		}
 	}
 
-	/* ============== the Reader =============== */
+	/* ============== the FileReader =============== */
 
-	private class Reader implements Runnable{
+	private class FileReader implements Runnable{
 
 		private ReadPointer readPointer;
 
 		private byte[] readBuff;
 
 		/**
-		 * Reader
+		 * FileReader
 		 * @param readPointer the ReadPointer
 		 */
-		Reader(ReadPointer readPointer) {
+		FileReader(ReadPointer readPointer) {
 			this.readPointer = readPointer;
 			this.readBuff = new byte[bufferSize];
 		}
@@ -239,7 +241,7 @@ public class FileStorer {
 					byte b = this.readBuff[i];
 					bos.write(b);
 				}
-				LogUtil.info("read finished with start=%d,size=%d,oid=%s",start,size,this.readPointer.oid);
+				LogUtil.info("file read finished with start=%d,size=%d,oid=%s",start,size,this.readPointer.oid);
 				handleObject(new AntObject(fid,this.readPointer.oid,start,end,bos.toByteArray()));
 				cyclicBarrier.await();
 			}catch (Exception e) {

@@ -6,13 +6,9 @@ import com.antfs.core.object.AntObject;
 import com.antfs.core.object.ObjectReader;
 import com.antfs.core.object.ObjectWriter;
 import com.antfs.core.util.FileUtil;
-import com.antfs.core.util.LogUtil;
 import io.netty.util.internal.StringUtil;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 
 /**
  * DefaultFileHandler
@@ -64,48 +60,9 @@ public class DefaultFileHandler implements FileHandler {
 
     @Override
     public File restore(String fid) {
-        File file;
-        AntMetaObject antMetaObject = objectReader.readMeta(fid);
-        if(antMetaObject==null){
-            LogUtil.error("no antMetaObject found with fid=%s",fid);
-            return null;
-        }
-        FileOutputStream fos = null;
-        BufferedOutputStream bos = null;
-        try {
-            File restoreDir = new File(Constants.FILE_RESTORE_PATH);
-            if(!restoreDir.exists()){
-                restoreDir.mkdirs();
-            }
-            file = new File(Constants.FILE_RESTORE_PATH+File.separator+antMetaObject.getFileName());
-            fos = new FileOutputStream(file);
-            bos = new BufferedOutputStream(fos);
-            for(String oid : antMetaObject.getOids()){
-                AntObject antObject = objectReader.read(fid,oid);
-                if(antObject!=null){
-                    bos.write(antObject.getContent());
-                }
-            }
-            return file;
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (fos != null) {
-                try {
-                    fos.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (bos != null) {
-                try {
-                    bos.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return null;
+        FileRestorer.Builder builder = new FileRestorer.Builder(fid,this.objectReader);
+        FileRestorer fileRestorer = builder.build();
+        return fileRestorer.restore();
     }
 
 }
