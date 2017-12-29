@@ -1,10 +1,12 @@
 package com.antfs.core.util;
 
 import com.antfs.core.common.Constants;
-import io.netty.util.CharsetUtil;
 import org.apache.commons.codec.digest.DigestUtils;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.math.BigDecimal;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
@@ -152,29 +154,29 @@ public class FileUtil {
         if(file==null || !file.exists() || file.isDirectory()){
             throw new IllegalArgumentException("file is null or file does not exists or file is a directory");
         }
-        FileInputStream is = null;
-        FileChannel channel = null;
+        RandomAccessFile randomAccessFile = null;
+        FileChannel fileChannel = null;
         MessageDigest digest = null;
         try{
-            is = new FileInputStream(file);
-            channel = is.getChannel();
+            randomAccessFile = new RandomAccessFile(file,"rw");
+            fileChannel = randomAccessFile.getChannel();
             digest = MessageDigest.getInstance(algorithm);
-            MappedByteBuffer byteBuffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, file.length());
+            MappedByteBuffer byteBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, file.length());
             digest.update(byteBuffer);
             return DigestUtils.md5Hex(digest.digest()).toLowerCase();
         }catch (IOException | NoSuchAlgorithmException e){
             e.printStackTrace();
         }finally {
-            if(is!=null){
+            if(randomAccessFile!=null){
                 try {
-                    is.close();
+                    randomAccessFile.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
-            if(channel!=null){
+            if(fileChannel!=null){
                 try {
-                    channel.close();
+                    fileChannel.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -211,20 +213,26 @@ public class FileUtil {
             throw new IllegalArgumentException("file is null or file does not exists or file is a directory");
         }
         CRC32 crc32 = new CRC32();
-        InputStream is = null;
-        byte[] bytes = new byte[1024];
+        RandomAccessFile randomAccessFile = null;
+        FileChannel fileChannel = null;
         try {
-            is = new BufferedInputStream(new FileInputStream(file));
-            int cnt;
-            while ((cnt = is.read(bytes)) != -1) {
-                crc32.update(bytes, 0, cnt);
-            }
+            randomAccessFile = new RandomAccessFile(file,"rw");
+            fileChannel = randomAccessFile.getChannel();
+            MappedByteBuffer mapBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY,0,file.length());
+            crc32.update(mapBuffer);
         }catch (IOException e){
             e.printStackTrace();
         }finally {
-            if(is!=null){
+            if(randomAccessFile!=null){
                 try {
-                    is.close();
+                    randomAccessFile.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if(fileChannel!=null){
+                try {
+                    fileChannel.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
