@@ -11,7 +11,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.io.UnsupportedEncodingException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel.MapMode;
 import java.util.HashSet;
@@ -30,7 +29,7 @@ public class FileExtractor {
 
 	private String fid;
 
-	private FileExtractorHandle handle;
+	private FileExtractorListener listener;
 
 	private ObjectHandler objectHandler;
 
@@ -48,10 +47,9 @@ public class FileExtractor {
 
 	private AntMetaObject antMetaObject;
 	
-	private FileExtractor(File file, String fid, FileExtractorHandle handle, ObjectHandler objectHandler, int bufferSize){
+	private FileExtractor(File file, String fid, ObjectHandler objectHandler, int bufferSize){
 		this.fileLength = file.length();
 		this.fid = fid;
-		this.handle = handle;
 		this.objectHandler = objectHandler;
 		this.bufferSize = bufferSize;
 		int threadSize = (int)Math.ceil((double)this.fileLength/this.bufferSize);
@@ -69,6 +67,11 @@ public class FileExtractor {
 		this.antMetaObject = new AntMetaObject(this.fid,file.getName());
 	}
 
+	/**
+	 * calculate the readPointer
+	 * @param start the start index
+	 * @param size the size to read
+	 */
 	private void calculateReadPointer(long start, long size){
 		if(start > this.fileLength-1){
 			return;
@@ -90,6 +93,34 @@ public class FileExtractor {
 		calculateReadPointer(end+1, size);
 	}
 
+
+	/**
+	 * listener antMetaObject
+	 * @param antMetaObject the antMetaObject to be handled
+	 */
+	private void handleMeta(AntMetaObject antMetaObject){
+		LogUtil.info("handle antMetaObject=%s",antMetaObject);
+		this.listener.onMetaObjectReady(antMetaObject);
+	}
+
+	/**
+	 * listener antObject
+	 * @param antObject the antObject to be handled
+	 */
+	private void handleObject(AntObject antObject){
+		LogUtil.info("handle antObject=%s",antObject);
+		this.listener.onAntObjectReady(antObject);
+		counter.incrementAndGet();
+	}
+
+	/**
+	 * addListener
+	 * @param listener the listener
+	 */
+	public void addListener(FileExtractorListener listener){
+		this.listener = listener;
+	}
+
 	/**
 	 * start the service
 	 */
@@ -97,7 +128,7 @@ public class FileExtractor {
 		// prepare the read pointer
 		calculateReadPointer(0, this.bufferSize);
 		LogUtil.info("readPointers=%s",readPointers);
-		// handle AntMetaObject
+		// listener AntMetaObject
 		handleMeta(this.antMetaObject);
 
 		final long startTime = System.currentTimeMillis();
@@ -105,7 +136,7 @@ public class FileExtractor {
 			@Override
 			public void run() {
 				// all Reader has finished
-				LogUtil.info("file split into antObjects number=(%d)",counter.get());
+				LogUtil.info("split file into (%d) antObjects",counter.get());
 				LogUtil.info("total cost time=(%dms)",(System.currentTimeMillis()-startTime));
 				shutdown();
 			}
@@ -129,17 +160,8 @@ public class FileExtractor {
 	}
 
 
-	private void handleMeta(AntMetaObject antMetaObject){
-		LogUtil.info("handle antMetaObject=%s",antMetaObject);
-		this.handle.storeMeta(antMetaObject);
-	}
 
-	private void handleObject(AntObject antObject){
-		LogUtil.info("handle antObject=%s",antObject);
-		this.handle.store(antObject);
-		counter.incrementAndGet();
-	}
-
+	/* ============== the ReadPointer =============== */
 
 	/**
 	 * the read pointer
@@ -181,6 +203,8 @@ public class FileExtractor {
 			return "{start:"+this.start+",end:"+this.end+"}";
 		}
 	}
+
+	/* ============== the Reader =============== */
 
 	private class Reader implements Runnable{
 
@@ -230,71 +254,27 @@ public class FileExtractor {
 			}
 		}
 
-		/*@Override
-		public void run() {
-			ByteArrayOutputStream bos = null;
-			try {
-				MappedByteBuffer mapBuffer = randomAccessFile.getChannel().map(MapMode.READ_ONLY,start,this.size);
-				bos = new ByteArrayOutputStream();
-				for(int offset=0;offset<size;offset+=bufferSize){
-					int readLength;
-					if(offset+bufferSize<=size){
-						readLength = bufferSize;
-					}else{
-						readLength = (int) (size-offset);
-					}
-					mapBuffer.get(readBuff, 0, readLength);
-					for(int i=0;i<readLength;i++){
-						byte tmp = readBuff[i];
-						bos.write(tmp);
-					}
-					handle(bos.toByteArray());
-					bos.reset();
-				}
-				if(bos.size()>0){
-					handle(bos.toByteArray());
-				}
-				cyclicBarrier.await();
-			}catch (Exception e) {
-				e.printStackTrace();
-			}finally {
-				if(bos!=null){
-					try {
-						bos.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		}*/
-
-
 	}
-	
+
+	/* ============== the FileExtractor Builder =============== */
+
 	public static class Builder{
 
 		private File file;
 
 		private String fid;
 
-		private FileExtractorHandle handle;
-
 		private ObjectHandler objectHandler;
 
-		private int bufferSize=4*1024*1024;
+		private int bufferSize = 0x400000;
 
-		public Builder(File file,String fid,FileExtractorHandle handle){
+		public Builder(File file,String fid,ObjectHandler objectHandler){
 			this.file = file;
 			if(!this.file.exists() || this.file.isDirectory()) {
 				throw new IllegalArgumentException("file does not exist or is not a file!");
 			}
 			this.fid = fid;
-			this.handle = handle;
-		}
-
-		public Builder objectHandler(ObjectHandler objectHandler){
 			this.objectHandler = objectHandler;
-			return this;
 		}
 
 		public Builder bufferSize(int bufferSize){
@@ -303,7 +283,7 @@ public class FileExtractor {
 		}
 
 		public FileExtractor build(){
-			return new FileExtractor(this.file,this.fid,this.handle,this.objectHandler,this.bufferSize);
+			return new FileExtractor(this.file,this.fid,this.objectHandler,this.bufferSize);
 		}
 	}
 	

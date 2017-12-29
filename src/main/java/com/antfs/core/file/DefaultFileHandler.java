@@ -1,7 +1,10 @@
 package com.antfs.core.file;
 
 import com.antfs.core.common.Constants;
-import com.antfs.core.object.*;
+import com.antfs.core.object.AntMetaObject;
+import com.antfs.core.object.AntObject;
+import com.antfs.core.object.ObjectReader;
+import com.antfs.core.object.ObjectWriter;
 import com.antfs.core.util.FileUtil;
 import com.antfs.core.util.LogUtil;
 import io.netty.util.internal.StringUtil;
@@ -22,12 +25,9 @@ public class DefaultFileHandler implements FileHandler {
 
     private final ObjectReader objectReader;
 
-    private final ObjectHandler objectHandler;
-
     public DefaultFileHandler(ObjectWriter objectWriter,ObjectReader objectReader){
         this.objectWriter = objectWriter;
         this.objectReader = objectReader;
-        this.objectHandler = objectReader;
     }
 
     @Override
@@ -41,20 +41,22 @@ public class DefaultFileHandler implements FileHandler {
         if(StringUtil.isNullOrEmpty(fid)){
             return null;
         }
-        FileExtractor.Builder builder = new FileExtractor.Builder(file,fid,new FileExtractorHandle() {
+        FileExtractor.Builder builder = new FileExtractor.Builder(file,fid,this.objectWriter);
+        builder.bufferSize(Constants.ANT_OBJECT_BUFFER_SIZE);
+
+        FileExtractor fileExtractor = builder.build();
+        fileExtractor.addListener(new FileExtractorListener() {
             @Override
-            public void storeMeta(AntMetaObject antMetaObject) {
+            public void onMetaObjectReady(AntMetaObject antMetaObject) {
                 objectWriter.writeMeta(antMetaObject);
             }
 
             @Override
-            public void store(AntObject antObject) {
+            public void onAntObjectReady(AntObject antObject) {
                 objectWriter.write(antObject);
             }
         });
 
-        builder.objectHandler(this.objectHandler).bufferSize(Constants.ANT_OBJECT_BUFFER_SIZE);
-        FileExtractor fileExtractor = builder.build();
         fileExtractor.start();
 
         return fid;

@@ -16,6 +16,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.zip.CRC32;
 
 /**
+ * FileUtil
  * @author gris.wang
  * @since 2017/12/26
  **/
@@ -36,9 +37,9 @@ public class FileUtil {
 
     /**
      * byte transfer to other
-     * @param capacity 容量单位
-     * @param byteLen 字节大小
-     * @return 转换后的大小
+     * @param capacity the unit
+     * @param byteLen byte length
+     * @return the transferred value
      */
     public static BigDecimal byteTransfer(Capacity capacity, long byteLen){
         BigDecimal len;
@@ -149,7 +150,7 @@ public class FileUtil {
      */
     private static String getDigest(File file,String algorithm){
         if(file==null || !file.exists() || file.isDirectory()){
-            return null;
+            throw new IllegalArgumentException("file is null or file does not exists or file is a directory");
         }
         FileInputStream is = null;
         FileChannel channel = null;
@@ -207,7 +208,7 @@ public class FileUtil {
      */
     public static String getCRC32(File file){
         if(file==null || !file.exists() || file.isDirectory()){
-            return null;
+            throw new IllegalArgumentException("file is null or file does not exists or file is a directory");
         }
         CRC32 crc32 = new CRC32();
         InputStream is = null;
@@ -235,16 +236,16 @@ public class FileUtil {
 
     public static void main(String[] args) {
         String filePath = "/Users/wanghui/Downloads/2017alitech_01.pdf";
+        int bufferSize = Constants.ANT_OBJECT_BUFFER_SIZE;
         File file = new File(filePath);
         long len = getFileLength(file);
-        LogUtil.info("len= (%d)",len);
-        int bufferSize = Constants.ANT_OBJECT_BUFFER_SIZE;
-        int num = (int)(len/bufferSize);
-        int num2 = (int)Math.ceil((double)len/bufferSize);
+        LogUtil.info("len =(%d)",len);
+        int quotient = (int)(len/bufferSize);
         int mod = (int)(len%bufferSize);
-        LogUtil.info("num= (%d)",num);
-        LogUtil.info("num2=(%d)",num2);
-        LogUtil.info("mod= (%d)",mod);
+        int size = (int)Math.ceil((double)len/bufferSize);
+        LogUtil.info("quot=(%d)",quotient);
+        LogUtil.info("mod =(%d)",mod);
+        LogUtil.info("size=(%d)",size);
 
         String crc = FileUtil.getCRC32(file);
         String md5 = FileUtil.getMD5(file);

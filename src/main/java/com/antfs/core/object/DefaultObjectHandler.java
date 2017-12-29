@@ -12,17 +12,24 @@ import java.io.File;
  **/
 public class DefaultObjectHandler implements ObjectHandler {
 
+    private String remix(String str,int subLen){
+        if(str==null || str.trim().length()==0){
+            return "";
+        }
+        String remix = DigestUtils.md5Hex(str).toLowerCase();
+        remix = remix.substring(0,subLen>remix.length()-1?remix.length()-1:subLen);
+        return remix;
+    }
+
     @Override
     public String oid(String fid, int part) {
-        String remixFid = DigestUtils.md5Hex(fid).toLowerCase();
-        remixFid = remixFid.substring(0,remixFid.length()/2);
-        return remixFid+"##"+part;
+        return remix(fid,16)+"##"+part;
     }
 
     @Override
     public String genMetaObjectPath(String fid) {
         // TODO the path to store ant meta object
-        return Constants.FILE_STORE_PATH+File.separator+"meta";
+        return Constants.ANT_OBJECT_STORE_PATH +File.separator+"meta";
     }
 
     @Override
@@ -33,7 +40,7 @@ public class DefaultObjectHandler implements ObjectHandler {
     @Override
     public String genObjectPath(String fid, String oid) {
         // TODO the path to store ant object
-        return Constants.FILE_STORE_PATH+File.separator+"ant";
+        return Constants.ANT_OBJECT_STORE_PATH +File.separator+"ant";
     }
 
     @Override
