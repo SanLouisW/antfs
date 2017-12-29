@@ -116,8 +116,8 @@ public class FileRestorer {
 			try {
 				AntObject antObject = objectReader.read(fid,this.oid);
 				if(antObject!=null){
-					long offset = antObject.getBitStart();
-					this.randomAccessFile.seek(offset);
+					long start = antObject.getBitStart();
+					this.randomAccessFile.seek(start);
 					this.randomAccessFile.write(antObject.getContent());
 					LogUtil.info("antObject read finished with antObject=%s",antObject);
 				}else{
