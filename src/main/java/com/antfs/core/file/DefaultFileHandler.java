@@ -41,11 +41,11 @@ public class DefaultFileHandler implements FileHandler {
         if(StringUtil.isNullOrEmpty(fid)){
             return null;
         }
-        FileExtractor.Builder builder = new FileExtractor.Builder(file,fid,this.objectWriter);
+        FileStorer.Builder builder = new FileStorer.Builder(file,fid,this.objectWriter);
         builder.bufferSize(Constants.ANT_OBJECT_BUFFER_SIZE);
 
-        FileExtractor fileExtractor = builder.build();
-        fileExtractor.addListener(new FileExtractorListener() {
+        FileStorer fileStorer = builder.build();
+        fileStorer.addListener(new FileStorerListener() {
             @Override
             public void onMetaObjectReady(AntMetaObject antMetaObject) {
                 objectWriter.writeMeta(antMetaObject);
@@ -57,7 +57,7 @@ public class DefaultFileHandler implements FileHandler {
             }
         });
 
-        fileExtractor.start();
+        fileStorer.start();
 
         return fid;
     }
@@ -73,6 +73,10 @@ public class DefaultFileHandler implements FileHandler {
         FileOutputStream fos = null;
         BufferedOutputStream bos = null;
         try {
+            File restoreDir = new File(Constants.FILE_RESTORE_PATH);
+            if(!restoreDir.exists()){
+                restoreDir.mkdirs();
+            }
             file = new File(Constants.FILE_RESTORE_PATH+File.separator+antMetaObject.getFileName());
             fos = new FileOutputStream(file);
             bos = new BufferedOutputStream(fos);

@@ -27,11 +27,23 @@ public class FileHandlerTest {
     }
 
 
-    public static void main(String[] args){
+    private static void testStore(){
         String filePath = "/Users/wanghui/Downloads/2017alitech_01.pdf";
         File file = new File(filePath);
         FileHandler fileHandler = new DefaultFileHandler(new DefaultObjectWriter(),new DefaultObjectReader());
         String fid = fileHandler.store(file);
         LogUtil.info("fid=%s",fid);
     }
+
+    private static void testRestore(){
+        String fid = "2463290722f20318316771f94badbf9b";
+        FileHandler fileHandler = new DefaultFileHandler(new DefaultObjectWriter(),new DefaultObjectReader());
+        File file = fileHandler.restore(fid);
+        LogUtil.info("file path=%s",file.getAbsolutePath());
+    }
+
+    public static void main(String[] args){
+        testRestore();
+    }
+
 }

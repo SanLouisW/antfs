@@ -4,11 +4,11 @@ import com.antfs.core.object.AntMetaObject;
 import com.antfs.core.object.AntObject;
 
 /**
- * FileExtractorListener
+ * FileStorerListener
  * @author gris.wang
  * @since 2017/12/27
  **/
-public interface FileExtractorListener {
+public interface FileStorerListener {
 
 	/**
 	 * handle the antMetaObject when it is ready

@@ -5,7 +5,6 @@ import com.antfs.core.object.AntObject;
 import com.antfs.core.object.ObjectHandler;
 import com.antfs.core.util.LogUtil;
 import io.netty.util.concurrent.DefaultThreadFactory;
-import org.omg.PortableInterceptor.LOCATION_FORWARD;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -20,17 +19,17 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * FileExtractor
+ * FileStorer
  * @author gris.wang
  * @since 2017/12/27
  **/
-public class FileExtractor {
+public class FileStorer {
 
 	private long fileLength;
 
 	private String fid;
 
-	private FileExtractorListener listener;
+	private FileStorerListener listener;
 
 	private ObjectHandler objectHandler;
 
@@ -48,7 +47,7 @@ public class FileExtractor {
 
 	private AntMetaObject antMetaObject;
 	
-	private FileExtractor(File file, String fid, ObjectHandler objectHandler, int bufferSize){
+	private FileStorer(File file, String fid, ObjectHandler objectHandler, int bufferSize){
 		this.fileLength = file.length();
 		this.fid = fid;
 		this.objectHandler = objectHandler;
@@ -104,7 +103,7 @@ public class FileExtractor {
 			LogUtil.info("handle antMetaObject=%s",antMetaObject);
 			this.listener.onMetaObjectReady(antMetaObject);
 		}else{
-			LogUtil.error("FileExtractorListener is null");
+			LogUtil.error("FileStorerListener is null");
 		}
 	}
 
@@ -117,7 +116,7 @@ public class FileExtractor {
 			LogUtil.info("handle antObject=%s", antObject);
 			this.listener.onAntObjectReady(antObject);
 		}else{
-			LogUtil.error("FileExtractorListener is null");
+			LogUtil.error("FileStorerListener is null");
 		}
 		counter.incrementAndGet();
 	}
@@ -126,7 +125,7 @@ public class FileExtractor {
 	 * addListener
 	 * @param listener the listener
 	 */
-	public void addListener(FileExtractorListener listener){
+	public void addListener(FileStorerListener listener){
 		this.listener = listener;
 	}
 
@@ -265,7 +264,7 @@ public class FileExtractor {
 
 	}
 
-	/* ============== the FileExtractor Builder =============== */
+	/* ============== the FileStorer Builder =============== */
 
 	public static class Builder{
 
@@ -291,8 +290,8 @@ public class FileExtractor {
 			return this;
 		}
 
-		public FileExtractor build(){
-			return new FileExtractor(this.file,this.fid,this.objectHandler,this.bufferSize);
+		public FileStorer build(){
+			return new FileStorer(this.file,this.fid,this.objectHandler,this.bufferSize);
 		}
 	}
 	
