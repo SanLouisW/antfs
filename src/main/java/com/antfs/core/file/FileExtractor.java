@@ -5,6 +5,7 @@ import com.antfs.core.object.AntObject;
 import com.antfs.core.object.ObjectHandler;
 import com.antfs.core.util.LogUtil;
 import io.netty.util.concurrent.DefaultThreadFactory;
+import org.omg.PortableInterceptor.LOCATION_FORWARD;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -99,8 +100,12 @@ public class FileExtractor {
 	 * @param antMetaObject the antMetaObject to be handled
 	 */
 	private void handleMeta(AntMetaObject antMetaObject){
-		LogUtil.info("handle antMetaObject=%s",antMetaObject);
-		this.listener.onMetaObjectReady(antMetaObject);
+		if(this.listener!=null) {
+			LogUtil.info("handle antMetaObject=%s",antMetaObject);
+			this.listener.onMetaObjectReady(antMetaObject);
+		}else{
+			LogUtil.error("FileExtractorListener is null");
+		}
 	}
 
 	/**
@@ -108,8 +113,12 @@ public class FileExtractor {
 	 * @param antObject the antObject to be handled
 	 */
 	private void handleObject(AntObject antObject){
-		LogUtil.info("handle antObject=%s",antObject);
-		this.listener.onAntObjectReady(antObject);
+		if(this.listener!=null) {
+			LogUtil.info("handle antObject=%s", antObject);
+			this.listener.onAntObjectReady(antObject);
+		}else{
+			LogUtil.error("FileExtractorListener is null");
+		}
 		counter.incrementAndGet();
 	}
 
