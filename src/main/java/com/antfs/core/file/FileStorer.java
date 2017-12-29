@@ -6,11 +6,7 @@ import com.antfs.core.object.ObjectHandler;
 import com.antfs.core.util.LogUtil;
 import io.netty.util.concurrent.DefaultThreadFactory;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.io.*;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel.MapMode;
 import java.util.HashSet;
@@ -216,11 +212,7 @@ public class FileStorer {
 
 	private class Reader implements Runnable{
 
-		private long start;
-
-		private long size;
-
-		private String oid;
+		private ReadPointer readPointer;
 
 		private byte[] readBuff;
 
@@ -229,9 +221,7 @@ public class FileStorer {
 		 * @param readPointer the ReadPointer
 		 */
 		Reader(ReadPointer readPointer) {
-			this.start = readPointer.start;
-			this.size = readPointer.end-readPointer.start+1;
-			this.oid = readPointer.oid;
+			this.readPointer = readPointer;
 			this.readBuff = new byte[bufferSize];
 		}
 
@@ -239,15 +229,18 @@ public class FileStorer {
 		public void run() {
 			ByteArrayOutputStream bos = null;
 			try {
-				MappedByteBuffer mapBuffer = randomAccessFile.getChannel().map(MapMode.READ_ONLY,this.start,this.size);
+				long start = this.readPointer.start;
+				long end = this.readPointer.end;
+				long size = end-start+1;
+				MappedByteBuffer mapBuffer = randomAccessFile.getChannel().map(MapMode.READ_ONLY,start,size);
 				bos = new ByteArrayOutputStream();
-				mapBuffer.get(this.readBuff, 0, (int)this.size);
-				for(int i=0;i<this.size;i++){
+				mapBuffer.get(this.readBuff, 0, (int)size);
+				for(int i=0;i<size;i++){
 					byte b = this.readBuff[i];
 					bos.write(b);
 				}
-				LogUtil.info("read finished with start=%d,size=%d,oid=%s",start,size,oid);
-				handleObject(new AntObject(fid,this.oid,bos.toByteArray()));
+				LogUtil.info("read finished with start=%d,size=%d,oid=%s",start,size,this.readPointer.oid);
+				handleObject(new AntObject(fid,this.readPointer.oid,start,end,bos.toByteArray()));
 				cyclicBarrier.await();
 			}catch (Exception e) {
 				e.printStackTrace();

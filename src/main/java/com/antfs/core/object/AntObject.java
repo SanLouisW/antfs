@@ -23,13 +23,25 @@ public class AntObject implements Serializable{
     private String oid;
 
     /**
+     * start bit of file
+     */
+    private long bitStart;
+
+    /**
+     * end bit of file
+     */
+    private long bitEnd;
+
+    /**
      * the file bytes stored by AntObject
      */
     private byte[] content;
 
-    public AntObject(String fid,String oid,byte[] content){
+    public AntObject(String fid,String oid,long bitStart,long bitEnd,byte[] content){
         this.fid = fid;
         this.oid = oid;
+        this.bitStart = bitStart;
+        this.bitEnd = bitEnd;
         this.content = content;
     }
 
@@ -47,6 +59,22 @@ public class AntObject implements Serializable{
 
     public void setOid(String oid) {
         this.oid = oid;
+    }
+
+    public long getBitStart() {
+        return bitStart;
+    }
+
+    public void setBitStart(long bitStart) {
+        this.bitStart = bitStart;
+    }
+
+    public long getBitEnd() {
+        return bitEnd;
+    }
+
+    public void setBitEnd(long bitEnd) {
+        this.bitEnd = bitEnd;
     }
 
     public byte[] getContent() {
