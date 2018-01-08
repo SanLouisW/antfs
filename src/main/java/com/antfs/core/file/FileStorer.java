@@ -138,15 +138,12 @@ public class FileStorer {
 		handleMeta(this.antMetaObject);
 
 		final long startTime = System.currentTimeMillis();
-		cyclicBarrier = new CyclicBarrier(this.threadSize,new Runnable() {
-			@Override
-			public void run() {
-				// all FileReader has finished
-				LogUtil.info("split file into ({}) antObjects",counter.get());
-				LogUtil.info("total cost time=({}ms)",(System.currentTimeMillis()-startTime));
-				shutdown();
-			}
-		});
+		cyclicBarrier = new CyclicBarrier(this.threadSize, () -> {
+            // all FileReader has finished
+            LogUtil.info("split file into ({}) antObjects",counter.get());
+            LogUtil.info("total cost time=({}ms)",(System.currentTimeMillis()-startTime));
+            shutdown();
+        });
 		for(ReadPointer readPointer: this.readPointers){
 			this.executorService.execute(new FileReader(readPointer));
 		}
