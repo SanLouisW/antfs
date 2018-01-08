@@ -25,10 +25,10 @@ public class PropertiesUtil {
 
     static{
 		if(null==propertiesUtilsHolder){
-			propertiesUtilsHolder = new HashMap<String,PropertiesUtil>();
+			propertiesUtilsHolder = new HashMap<>();
 		}
 		if(null==propertiesMap){
-			propertiesMap = new HashMap<PropertiesUtil,Properties>();
+			propertiesMap = new HashMap<>();
 		}
 	}
 
@@ -88,7 +88,7 @@ public class PropertiesUtil {
     public static synchronized PropertiesUtil getInstance(String propertiesPath){
     	PropertiesUtil propertiesUtil = propertiesUtilsHolder.get(propertiesPath);
     	if(null==propertiesUtil){
-    		LogUtil.info("PropertiesUtil instance is null with propertiesPath={%s},will new a instance directly",propertiesPath);
+    		LogUtil.info("PropertiesUtil instance is null with propertiesPath={},will new a instance directly",propertiesPath);
 			InputStream inputStream = null;
 			try{
 				propertiesUtil = new PropertiesUtil();

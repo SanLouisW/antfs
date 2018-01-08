@@ -19,6 +19,24 @@ public class Constants {
     public static final int SERVER_PORT = ANT_FS_PROPERTIES.getInt("netty.server.port",8889);
 
     /**
+     * BossGroup Size
+     */
+    public static final int BOSS_GROUP_SIZE = null!=Integer.getInteger("netty.server.bossGroup.size")?Integer.getInteger("netty.server.bossGroup.size"):ANT_FS_PROPERTIES.getInt("netty.server.bossGroup.size",2);
+
+
+    /**
+     * WorkerGroup Size
+     */
+    public static final int WORKER_GROUP_SIZE = null!=Integer.getInteger("netty.server.workerGroup.size")?Integer.getInteger("netty.server.workerGroup.size"):ANT_FS_PROPERTIES.getInt("netty.server.workerGroup.size",4);
+
+
+    /**
+     * the maxContentLength which set to HttpObjectAggregator
+     */
+    public static final int MAX_CONTENT_LENGTH = ANT_FS_PROPERTIES.getInt("netty.maxContentLength",10485760);
+
+    
+    /**
      * the default AntObject size
      * 4MB
      */
@@ -33,5 +51,11 @@ public class Constants {
      * the path where antObject restored to file
      */
     public static final String FILE_RESTORE_PATH = ANT_FS_PROPERTIES.getString("file.restore.path");
+
+    public static final String FAVICON_ICO = "/favicon.ico";
+
+    public static final String CONNECTION_KEEP_ALIVE = "keep-alive";
+
+    public static final String CONNECTION_CLOSE = "close";
 
 }

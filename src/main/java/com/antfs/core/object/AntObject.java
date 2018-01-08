@@ -23,25 +23,25 @@ public class AntObject implements Serializable{
     private String oid;
 
     /**
-     * start bit of file
+     * start byte of file
      */
-    private long bitStart;
+    private long byteStart;
 
     /**
-     * end bit of file
+     * end byte of file
      */
-    private long bitEnd;
+    private long byteEnd;
 
     /**
      * the file bytes stored by AntObject
      */
     private byte[] content;
 
-    public AntObject(String fid,String oid,long bitStart,long bitEnd,byte[] content){
+    public AntObject(String fid, String oid, long byteStart, long byteEnd, byte[] content){
         this.fid = fid;
         this.oid = oid;
-        this.bitStart = bitStart;
-        this.bitEnd = bitEnd;
+        this.byteStart = byteStart;
+        this.byteEnd = byteEnd;
         this.content = content;
     }
 
@@ -61,20 +61,20 @@ public class AntObject implements Serializable{
         this.oid = oid;
     }
 
-    public long getBitStart() {
-        return bitStart;
+    public long getByteStart() {
+        return byteStart;
     }
 
-    public void setBitStart(long bitStart) {
-        this.bitStart = bitStart;
+    public void setByteStart(long byteStart) {
+        this.byteStart = byteStart;
     }
 
-    public long getBitEnd() {
-        return bitEnd;
+    public long getByteEnd() {
+        return byteEnd;
     }
 
-    public void setBitEnd(long bitEnd) {
-        this.bitEnd = bitEnd;
+    public void setByteEnd(long byteEnd) {
+        this.byteEnd = byteEnd;
     }
 
     public byte[] getContent() {
@@ -89,7 +89,7 @@ public class AntObject implements Serializable{
     public String toString() {
         return new StringBuilder().append("{fid:").append(fid)
                                   .append(",oid:").append(oid)
-                                  .append(",start:").append(bitStart)
-                                  .append(",end:").append(bitEnd).append("}").toString();
+                                  .append(",start:").append(byteStart)
+                                  .append(",end:").append(byteEnd).append("}").toString();
     }
 }

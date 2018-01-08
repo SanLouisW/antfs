@@ -35,12 +35,12 @@ public class FileRestorer {
 		this.objectReader = objectReader;
 		this.antMetaObject = this.objectReader.readMeta(fid);
 		if(this.antMetaObject==null){
-			LogUtil.error("no antMetaObject found with fid=%s",fid);
+			LogUtil.error("no antMetaObject found with fid={}",fid);
 			throw new IllegalArgumentException("fid is invalid");
 		}
 		int threadSize = this.antMetaObject.getOids().size();
 		this.latch = new CountDownLatch(threadSize);
-		ThreadFactory threadFactory = new DefaultThreadFactory("restore-pool-thread-%d");
+		ThreadFactory threadFactory = new DefaultThreadFactory("restore-pool-thread");
 		this.executorService = new ThreadPoolExecutor(threadSize,100,0L,TimeUnit.MILLISECONDS,
 										new LinkedBlockingDeque<>(1024),
 										threadFactory,
@@ -55,11 +55,11 @@ public class FileRestorer {
 	public File restore(){
 		File restoreDir = new File(Constants.FILE_RESTORE_PATH);
 		if (!restoreDir.exists() && restoreDir.mkdirs()) {
-			LogUtil.info("create restore directory=(%s)",restoreDir.getAbsolutePath());
+			LogUtil.info("create restore directory=({})",restoreDir.getAbsolutePath());
 		}
 		File file = new File(Constants.FILE_RESTORE_PATH+File.separator+this.antMetaObject.getFileName());
 		if(file.exists() && file.delete()){
-			LogUtil.info("deleted exists file=(%s)",file.getAbsolutePath());
+			LogUtil.info("deleted exists file=({})",file.getAbsolutePath());
 		}
 		long startTime = System.currentTimeMillis();
 		for(String oid : antMetaObject.getOids()){
@@ -72,7 +72,7 @@ public class FileRestorer {
 			e.printStackTrace();
 		}
 		// all AntObjectReader has finished
-		LogUtil.info("total cost time=(%dms)",(System.currentTimeMillis()-startTime));
+		LogUtil.info("total cost time=({}ms)",(System.currentTimeMillis()-startTime));
 		shutdown();
 		return file;
 	}
@@ -116,12 +116,12 @@ public class FileRestorer {
 			try {
 				AntObject antObject = objectReader.read(fid,this.oid);
 				if(antObject!=null){
-					long start = antObject.getBitStart();
+					long start = antObject.getByteStart();
 					this.randomAccessFile.seek(start);
 					this.randomAccessFile.write(antObject.getContent());
-					LogUtil.info("antObject read finished with antObject=%s",antObject);
+					LogUtil.info("antObject read finished with antObject={}",antObject);
 				}else{
-					LogUtil.error("antObject read from disk is null,with fid=(%s),oid=(%s)",fid,this.oid);
+					LogUtil.error("antObject read from disk is null,with fid=({}),oid=({})",fid,this.oid);
 				}
 			}catch (Exception e) {
 				e.printStackTrace();

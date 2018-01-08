@@ -1,76 +1,109 @@
 package com.antfs.core.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 /**
- * 日志工具
+ * Log util
  * @author gris.wang
  * @since 2017/12/4
  **/
-public class LogUtil {
+public class LogUtil{
 
     private LogUtil(){
 
     }
 
-    /**
-     * 获取log信息
-     * @param log 日志信息
-     * @param params 日志信息中的参数
-     * @return
-     */
-    public static String getLogInfo(String log,Object... params){
-        String logInfo = log;
-        if(log!=null && log.trim().length()>0){
-            logInfo = String.format(log,params);
-        }
-        return logInfo;
+    private static Map<Class,Logger> loggerMap;
+    private static Lock lock;
+
+    static{
+        loggerMap = new ConcurrentHashMap<>();
+        lock = new ReentrantLock();
     }
 
+    private static Logger getLogger(){
+        StackTraceElement[] traceElements = Thread.currentThread().getStackTrace();
+        /*
+         * the StackTrace are always like blow:
+         * java.lang.Thread.getStackTrace(Thread.java:1559)------------- 0
+         * com.antfs.core.util.LogUtil.getLogger(LogUtil.java:32)------- 1
+         * com.antfs.core.util.LogUtil.info(LogUtil.java:71)------------ 2
+         * the.class.who.call.LogUtil.info(Caller.java:254)------------- 3
+         */
+        StackTraceElement caller = traceElements[3];
+        Class clazz = null;
+        try{
+            clazz = Class.forName(caller.getClassName());
+        }catch (ClassNotFoundException e){
+            e.printStackTrace();
+        }
+        if(clazz == null){
+            return null;
+        }
+        Logger logger = loggerMap.get(clazz);
+        if(logger==null){
+            lock.lock();
+            try {
+                if(!loggerMap.containsKey(clazz)) {
+                    logger = LoggerFactory.getLogger(clazz);
+                    loggerMap.putIfAbsent(clazz,logger);
+                }else{
+                    logger = loggerMap.get(clazz);
+                }
+            }finally {
+                lock.unlock();
+            }
+        }
+        return logger;
+    }
+
+
     /**
-     * 以info方式打印
-     * @param log 日志信息
-     * @param params 日志信息中的参数
+     * use info log level to print
+     * @param log the log info
+     * @param params log params
      */
     public static void info(String log,Object... params){
-        if(log!=null && log.trim().length()>0){
-            System.out.println(getLogInfo(log, params));
+        Logger logger = getLogger();
+        if(logger!=null && logger.isInfoEnabled()){
+            // TODO the line number is not correct
+            logger.info(log, params);
         }
     }
 
     /**
-     * 以info方式打印
-     * @param throwable 异常信息
+     * use warn log level to print
+     * @param log the log info
+     * @param params log params
      */
-    public static void info(Throwable throwable){
-        if(throwable!=null){
-            System.out.println(throwable.getMessage());
-            for(StackTraceElement traceElement : throwable.getStackTrace()) {
-                System.out.println(traceElement.getClassName()+":"+traceElement.getLineNumber()+"-"+traceElement.getMethodName());
-            }
+    public static void warn(String log,Object... params){
+        Logger logger = getLogger();
+        if(logger!=null && logger.isWarnEnabled()){
+            logger.warn(log, params);
         }
     }
 
     /**
-     * 以error方式打印
-     * @param log 日志信息
-     * @param params 日志信息中的参数
+     * use error log level to print
+     * @param log the log info
+     * @param params log params
      */
     public static void error(String log,Object... params){
-        if(log!=null && log.trim().length()>0){
-            System.err.println(getLogInfo(log, params));
+        Logger logger = getLogger();
+        if(logger!=null && logger.isErrorEnabled()){
+            logger.error(log, params);
         }
     }
 
-    /**
-     * 以error方式打印
-     * @param throwable 异常信息
-     */
-    public static void error(Throwable throwable){
-        if(throwable!=null){
-            System.err.println(throwable.getMessage());
-            for(StackTraceElement traceElement : throwable.getStackTrace()) {
-                System.err.println(traceElement.getClassName()+":"+traceElement.getLineNumber()+"-"+traceElement.getMethodName());
-            }
-        }
+
+    public static void main(String[] args) {
+        LogUtil.info("hhhh");
     }
 
 }

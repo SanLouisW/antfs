@@ -90,20 +90,20 @@ public class FileUtil {
                 LogUtil.info("file doesn't exist or is not a file");
             }
         } catch (IOException e) {
-            LogUtil.error(e);
+            LogUtil.error(e.getMessage());
         } finally {
             if (null!=fc){
                 try{
                     fc.close();
                 }catch(IOException e){
-                    LogUtil.error(e);
+                    LogUtil.error(e.getMessage());
                 }
             }
             if (null!=fis){
                 try{
                     fis.close();
                 }catch(IOException e){
-                    LogUtil.error(e);
+                    LogUtil.error(e.getMessage());
                 }
             }
         }
@@ -138,7 +138,7 @@ public class FileUtil {
         try {
             bytes = Files.readAllBytes(inputPath);
         } catch (IOException e) {
-            LogUtil.error(e);
+            LogUtil.error(e.getMessage());
         }
         return bytes;
     }
@@ -247,20 +247,20 @@ public class FileUtil {
         int bufferSize = Constants.ANT_OBJECT_BUFFER_SIZE;
         File file = new File(filePath);
         long len = getFileLength(file);
-        LogUtil.info("len =(%d)",len);
+        LogUtil.info("len =({})",len);
         int quotient = (int)(len/bufferSize);
         int mod = (int)(len%bufferSize);
         int size = (int)Math.ceil((double)len/bufferSize);
-        LogUtil.info("quot=(%d)",quotient);
-        LogUtil.info("mod =(%d)",mod);
-        LogUtil.info("size=(%d)",size);
+        LogUtil.info("quot=({})",quotient);
+        LogUtil.info("mod =({})",mod);
+        LogUtil.info("size=({})",size);
 
         String crc = FileUtil.getCRC32(file);
         String md5 = FileUtil.getMD5(file);
         String sha1 = FileUtil.getSha1(file);
-        LogUtil.info("crc =(%s)",crc);
-        LogUtil.info("md5 =(%s)",md5);
-        LogUtil.info("sha1=(%s)",sha1);
+        LogUtil.info("crc =({})",crc);
+        LogUtil.info("md5 =({})",md5);
+        LogUtil.info("sha1=({})",sha1);
     }
 
 }

@@ -98,7 +98,7 @@ public class FileStorer {
 	 */
 	private void handleMeta(AntMetaObject antMetaObject){
 		if(this.listener!=null) {
-			LogUtil.info("handle antMetaObject=%s",antMetaObject);
+			LogUtil.info("handle antMetaObject={}",antMetaObject);
 			this.listener.onMetaObjectReady(antMetaObject);
 		}else{
 			LogUtil.error("FileStorerListener is null");
@@ -111,7 +111,7 @@ public class FileStorer {
 	 */
 	private void handleObject(AntObject antObject){
 		if(this.listener!=null) {
-			LogUtil.info("handle antObject=%s", antObject);
+			LogUtil.info("handle antObject={}", antObject);
 			this.listener.onAntObjectReady(antObject);
 		}else{
 			LogUtil.error("FileStorerListener is null");
@@ -133,7 +133,7 @@ public class FileStorer {
 	public void start(){
 		// prepare the read pointer
 		calculateReadPointer(0, this.bufferSize);
-		LogUtil.info("readPointers=%s",this.readPointers);
+		LogUtil.info("readPointers={}",this.readPointers);
 		// listener AntMetaObject
 		handleMeta(this.antMetaObject);
 
@@ -142,8 +142,8 @@ public class FileStorer {
 			@Override
 			public void run() {
 				// all FileReader has finished
-				LogUtil.info("split file into (%d) antObjects",counter.get());
-				LogUtil.info("total cost time=(%dms)",(System.currentTimeMillis()-startTime));
+				LogUtil.info("split file into ({}) antObjects",counter.get());
+				LogUtil.info("total cost time=({}ms)",(System.currentTimeMillis()-startTime));
 				shutdown();
 			}
 		});
@@ -241,7 +241,7 @@ public class FileStorer {
 					byte b = this.readBuff[i];
 					bos.write(b);
 				}
-				LogUtil.info("file read finished with start=%d,size=%d,oid=%s",start,size,this.readPointer.oid);
+				LogUtil.info("file read finished with start={},size={},oid={}",start,size,this.readPointer.oid);
 				handleObject(new AntObject(fid,this.readPointer.oid,start,end,bos.toByteArray()));
 				cyclicBarrier.await();
 			}catch (Exception e) {
