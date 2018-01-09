@@ -102,8 +102,4 @@ public class LogUtil{
     }
 
 
-    public static void main(String[] args) {
-        LogUtil.info("hhhh");
-    }
-
 }

@@ -6,7 +6,10 @@ import com.antfs.core.object.ObjectHandler;
 import com.antfs.core.util.LogUtil;
 import io.netty.util.concurrent.DefaultThreadFactory;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel.MapMode;
 import java.util.HashSet;
@@ -226,31 +229,24 @@ public class FileStorer {
 
 		@Override
 		public void run() {
-			ByteArrayOutputStream bos = null;
+			byte[] content;
 			try {
 				long start = this.readPointer.start;
 				long end = this.readPointer.end;
 				long size = end-start+1;
 				MappedByteBuffer mapBuffer = randomAccessFile.getChannel().map(MapMode.READ_ONLY,start,size);
-				bos = new ByteArrayOutputStream();
 				mapBuffer.get(this.readBuff, 0, (int)size);
-				for(int i=0;i<size;i++){
-					byte b = this.readBuff[i];
-					bos.write(b);
+				if(size==bufferSize){
+					content = this.readBuff;
+				}else{
+					content = new byte[(int)size];
+					System.arraycopy(this.readBuff, 0, content, 0, (int)size);
 				}
 				LogUtil.info("file read finished with start={},size={},oid={}",start,size,this.readPointer.oid);
-				handleObject(new AntObject(fid,this.readPointer.oid,start,end,bos.toByteArray()));
+				handleObject(new AntObject(fid,this.readPointer.oid,start,end,content));
 				cyclicBarrier.await();
 			}catch (Exception e) {
 				e.printStackTrace();
-			}finally {
-				if(bos!=null){
-					try {
-						bos.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
 			}
 		}
 
