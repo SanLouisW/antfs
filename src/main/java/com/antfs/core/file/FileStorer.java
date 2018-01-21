@@ -59,12 +59,11 @@ public class FileStorer {
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
-		ThreadFactory threadFactory = new DefaultThreadFactory("store-pool-thread");
 		this.executorService = new ThreadPoolExecutor(this.threadSize,100,0L,TimeUnit.MILLISECONDS,
 										new LinkedBlockingDeque<>(1024),
-										threadFactory,
+										new DefaultThreadFactory("store-pool-thread"),
 										new ThreadPoolExecutor.AbortPolicy());
-		this.readPointers = new HashSet<ReadPointer>();
+		this.readPointers = new HashSet<>();
 		this.antMetaObject = new AntMetaObject(this.fid,file.getName());
 	}
 

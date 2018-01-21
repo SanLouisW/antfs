@@ -40,10 +40,9 @@ public class FileRestorer {
 		}
 		int threadSize = this.antMetaObject.getOids().size();
 		this.latch = new CountDownLatch(threadSize);
-		ThreadFactory threadFactory = new DefaultThreadFactory("restore-pool-thread");
 		this.executorService = new ThreadPoolExecutor(threadSize,100,0L,TimeUnit.MILLISECONDS,
 										new LinkedBlockingDeque<>(1024),
-										threadFactory,
+										new DefaultThreadFactory("restore-pool-thread"),
 										new ThreadPoolExecutor.AbortPolicy());
 	}
 
