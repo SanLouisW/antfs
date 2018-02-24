@@ -3,8 +3,9 @@ package io.antfs.lang.file;
 import io.antfs.lang.object.AntMetaObject;
 import io.antfs.lang.object.AntObject;
 import io.antfs.lang.object.ObjectHandler;
-import io.antfs.common.util.LogUtil;
 import io.netty.util.concurrent.DefaultThreadFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -23,6 +24,8 @@ import java.util.concurrent.atomic.AtomicLong;
  * @since 2017/12/27
  **/
 public class FileStorer {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(FileStorer.class);
 
 	private long fileLength;
 
@@ -100,10 +103,10 @@ public class FileStorer {
 	 */
 	private void handleMeta(AntMetaObject antMetaObject){
 		if(this.listener!=null) {
-			LogUtil.info("handle antMetaObject={}",antMetaObject);
+			LOGGER.info("handle antMetaObject={}",antMetaObject);
 			this.listener.onMetaObjectReady(antMetaObject);
 		}else{
-			LogUtil.error("FileStorerListener is null");
+			LOGGER.error("FileStorerListener is null");
 		}
 	}
 
@@ -113,10 +116,10 @@ public class FileStorer {
 	 */
 	private void handleObject(AntObject antObject){
 		if(this.listener!=null) {
-			LogUtil.info("handle antObject={}", antObject);
+			LOGGER.info("handle antObject={}", antObject);
 			this.listener.onAntObjectReady(antObject);
 		}else{
-			LogUtil.error("FileStorerListener is null");
+			LOGGER.error("FileStorerListener is null");
 		}
 		counter.incrementAndGet();
 	}
@@ -135,15 +138,15 @@ public class FileStorer {
 	public void start(){
 		// prepare the read pointer
 		calculateReadPointer(0, this.bufferSize);
-		LogUtil.info("readPointers={}",this.readPointers);
+		LOGGER.info("readPointers={}",this.readPointers);
 		// listener AntMetaObject
 		handleMeta(this.antMetaObject);
 
 		final long startTime = System.currentTimeMillis();
 		cyclicBarrier = new CyclicBarrier(this.threadSize, () -> {
             // all FileReader has finished
-            LogUtil.info("split file into ({}) antObjects",counter.get());
-            LogUtil.info("total cost time=({}ms)",(System.currentTimeMillis()-startTime));
+            LOGGER.info("split file into ({}) antObjects",counter.get());
+            LOGGER.info("total cost time=({}ms)",(System.currentTimeMillis()-startTime));
             shutdown();
         });
 		for(ReadPointer readPointer: this.readPointers){
@@ -155,7 +158,7 @@ public class FileStorer {
 	 * shutdown
 	 */
 	private void shutdown(){
-		LogUtil.info("all readPointers have finished,will shutdown");
+		LOGGER.info("all readPointers have finished,will shutdown");
 		try {
 			this.randomAccessFile.close();
 		} catch (IOException e) {
@@ -241,7 +244,7 @@ public class FileStorer {
 					content = new byte[(int)size];
 					System.arraycopy(this.readBuff, 0, content, 0, (int)size);
 				}
-				LogUtil.info("file read finished with start={},size={},oid={}",start,size,this.readPointer.oid);
+				LOGGER.info("file read finished with start={},size={},oid={}",start,size,this.readPointer.oid);
 				handleObject(new AntObject(fid,this.readPointer.oid,start,end,content));
 				cyclicBarrier.await();
 			}catch (Exception e) {

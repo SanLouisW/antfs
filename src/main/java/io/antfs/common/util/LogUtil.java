@@ -11,18 +11,18 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author gris.wang
  * @since 2017/12/4
  **/
-public class LogUtil{
+public class LogUtil {
 
     private LogUtil(){
 
     }
 
     private static Map<Class,Logger> loggerMap;
-    private static final Object lock;
+    private static final Object LOCK;
 
     static{
         loggerMap = new ConcurrentHashMap<>();
-        lock = new Object();
+        LOCK = new Object();
     }
 
     private static Logger getLogger(){
@@ -46,7 +46,7 @@ public class LogUtil{
         }
         Logger logger = loggerMap.get(clazz);
         if(logger==null){
-            synchronized (lock){
+            synchronized (LOCK){
                 if(!loggerMap.containsKey(clazz)) {
                     logger = LoggerFactory.getLogger(clazz);
                     loggerMap.putIfAbsent(clazz,logger);

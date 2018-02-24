@@ -4,9 +4,10 @@ import io.antfs.lang.file.DefaultFileHandler;
 import io.antfs.lang.file.FileHandler;
 import io.antfs.lang.object.DefaultObjectReader;
 import io.antfs.lang.object.DefaultObjectWriter;
-import io.antfs.common.util.LogUtil;
 import org.junit.After;
 import org.junit.Before;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 
@@ -16,6 +17,8 @@ import java.io.File;
  **/
 public class FileHandlerTest {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileHandlerTest.class);
+    
     @Before
     public void beforeTest(){
 
@@ -32,14 +35,14 @@ public class FileHandlerTest {
         File file = new File(filePath);
         FileHandler fileHandler = new DefaultFileHandler(new DefaultObjectWriter(),new DefaultObjectReader());
         String fid = fileHandler.store(file);
-        LogUtil.info("fid={}",fid);
+        LOGGER.info("fid={}",fid);
     }
 
     private static void testRestore(){
         String fid = "2463290722f20318316771f94badbf9b";
         FileHandler fileHandler = new DefaultFileHandler(new DefaultObjectWriter(),new DefaultObjectReader());
         File file = fileHandler.restore(fid);
-        LogUtil.info("file path={}",file.getAbsolutePath());
+        LOGGER.info("file path={}",file.getAbsolutePath());
     }
 
     public static void main(String[] args){

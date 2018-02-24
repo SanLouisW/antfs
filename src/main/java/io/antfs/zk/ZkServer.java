@@ -1,6 +1,5 @@
 package io.antfs.zk;
 
-import io.antfs.common.util.LogUtil;
 import com.xiaoleilu.hutool.io.FileUtil;
 import com.xiaoleilu.hutool.util.StrUtil;
 import org.apache.zookeeper.server.*;
@@ -10,6 +9,8 @@ import org.apache.zookeeper.server.quorum.QuorumPeer;
 import org.apache.zookeeper.server.quorum.QuorumPeerConfig;
 import org.apache.zookeeper.server.quorum.QuorumPeerConfig.ConfigException;
 import org.apache.zookeeper.server.quorum.QuorumPeerMain;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,6 +23,8 @@ import java.io.IOException;
  */
 public class ZkServer {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(ZkServer.class);
+	
 	/**
 	 * zk base directory
 	 * used to store properties generated in runtime
@@ -71,7 +74,7 @@ public class ZkServer {
 	 */
 	public void startStandalone(ServerConfig config) throws IOException,AdminServer.AdminServerException {
 		ZooKeeperServerMain main = new ZooKeeperServerMain();
-		LogUtil.info("ZkServer start with clientPortAddress={}", config.getClientPortAddress());
+		LOGGER.info("ZkServer start with clientPortAddress={}", config.getClientPortAddress());
 		main.runFromConfig(config);
 	}
 
@@ -114,7 +117,7 @@ public class ZkServer {
 		quorumPeer.setSyncEnabled(config.getSyncEnabled());
 		quorumPeer.setQuorumListenOnAllIPs(config.getQuorumListenOnAllIPs());
 
-		LogUtil.info("ZkServerCluster start with clientPortAddress={}", config.getClientPortAddress());
+		LOGGER.info("ZkServerCluster start with clientPortAddress={}", config.getClientPortAddress());
 		quorumPeer.start();
 	}
 

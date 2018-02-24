@@ -2,6 +2,8 @@ package io.antfs.common.util;
 
 import io.antfs.common.Constants;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -23,6 +25,8 @@ import java.util.zip.CRC32;
  * @since 2017/12/26
  **/
 public class FileUtil {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileUtil.class);
 
     public enum Capacity{
         B,
@@ -87,23 +91,23 @@ public class FileUtil {
                 fc = fis.getChannel();
                 length = fc.size();
             }else{
-                LogUtil.info("file doesn't exist or is not a file");
+                LOGGER.info("file doesn't exist or is not a file");
             }
         } catch (IOException e) {
-            LogUtil.error(e.getMessage());
+            LOGGER.error(e.getMessage());
         } finally {
             if (null!=fc){
                 try{
                     fc.close();
                 }catch(IOException e){
-                    LogUtil.error(e.getMessage());
+                    LOGGER.error(e.getMessage());
                 }
             }
             if (null!=fis){
                 try{
                     fis.close();
                 }catch(IOException e){
-                    LogUtil.error(e.getMessage());
+                    LOGGER.error(e.getMessage());
                 }
             }
         }
@@ -120,7 +124,7 @@ public class FileUtil {
         if (file.exists() && file.isFile()){
             length = file.length();
         }else{
-            LogUtil.info("file doesn't exist or is not a file");
+            LOGGER.info("file doesn't exist or is not a file");
         }
         return length;
     }
@@ -131,14 +135,14 @@ public class FileUtil {
      * @return the all file bytes
      */
     public static byte[] getAllFileBytes(String filePath){
-        LogUtil.info("Getting bytes from file...");
+        LOGGER.info("Getting bytes from file...");
         Path inputPath = Paths.get(filePath);
         byte[] bytes = {};
 
         try {
             bytes = Files.readAllBytes(inputPath);
         } catch (IOException e) {
-            LogUtil.error(e.getMessage());
+            LOGGER.error(e.getMessage());
         }
         return bytes;
     }
@@ -247,20 +251,20 @@ public class FileUtil {
         int bufferSize = Constants.ANT_OBJECT_BUFFER_SIZE;
         File file = new File(filePath);
         long len = getFileLength(file);
-        LogUtil.info("len =({})",len);
+        LOGGER.info("len =({})",len);
         int quotient = (int)(len/bufferSize);
         int mod = (int)(len%bufferSize);
         int size = (int)Math.ceil((double)len/bufferSize);
-        LogUtil.info("quot=({})",quotient);
-        LogUtil.info("mod =({})",mod);
-        LogUtil.info("size=({})",size);
+        LOGGER.info("quot=({})",quotient);
+        LOGGER.info("mod =({})",mod);
+        LOGGER.info("size=({})",size);
 
         String crc = FileUtil.getCRC32(file);
         String md5 = FileUtil.getMD5(file);
         String sha1 = FileUtil.getSha1(file);
-        LogUtil.info("crc =({})",crc);
-        LogUtil.info("md5 =({})",md5);
-        LogUtil.info("sha1=({})",sha1);
+        LOGGER.info("crc =({})",crc);
+        LOGGER.info("md5 =({})",md5);
+        LOGGER.info("sha1=({})",sha1);
     }
 
 }

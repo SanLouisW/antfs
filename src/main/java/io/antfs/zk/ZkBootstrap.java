@@ -1,10 +1,11 @@
 package io.antfs.zk;
 
 import com.alibaba.fastjson.JSON;
-import io.antfs.common.util.LogUtil;
 import com.xiaoleilu.hutool.io.FileUtil;
 import com.xiaoleilu.hutool.util.CollectionUtil;
 import com.xiaoleilu.hutool.util.StrUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.List;
@@ -17,6 +18,8 @@ import java.util.List;
  **/
 public class ZkBootstrap {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ZkBootstrap.class);
+    
     private static final String DEFAULT_ZK_CFG = ZkBootstrap.class.getResource("/zk.cfg").getPath();
 
     private static final int SYSTEM_PORT_UP_RANGE = 1024;
@@ -31,7 +34,7 @@ public class ZkBootstrap {
             ZkConfig zkConfig = JSON.parseObject(FileUtil.readUtf8String(new File(zkCfg)),ZkConfig.class);
             start(zkConfig);
         }catch (Exception e){
-            LogUtil.error("ZkBootstrap start failed,cause:{}",e);
+            LOGGER.error("ZkBootstrap start failed,cause:{}",e);
             System.exit(1);
         }
     }
@@ -139,7 +142,7 @@ public class ZkBootstrap {
             ZkServer zkServer = new ZkServer();
             zkServer.startStandalone(realPropertiesPath);
         }catch (Exception e) {
-            LogUtil.error("startStandalone error,cause:",e);
+            LOGGER.error("startStandalone error,cause:",e);
             throw new RuntimeException(e.getMessage());
         }
     }
@@ -161,7 +164,7 @@ public class ZkBootstrap {
                 zkServer.startCluster(realPropertiesPath);
             }
         }catch (Exception e) {
-            LogUtil.error("startCluster error,cause:",e);
+            LOGGER.error("startCluster error,cause:",e);
             throw new RuntimeException(e.getMessage());
         }
     }

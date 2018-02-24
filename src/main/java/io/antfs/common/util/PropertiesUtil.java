@@ -1,5 +1,8 @@
 package io.antfs.common.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -13,6 +16,8 @@ import java.util.Properties;
  **/
 public class PropertiesUtil {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(PropertiesUtil.class);
+	
     private static Map<String,PropertiesUtil> propertiesUtilsHolder = null;
     
     private static Map<PropertiesUtil,Properties> propertiesMap = null;
@@ -67,7 +72,7 @@ public class PropertiesUtil {
 				properties.load(inputStream);
 			}
 		} catch (Exception e) {
-			LogUtil.error("getPropertiesByResource error,cause:",e);
+			LOGGER.error("getPropertiesByResource error,cause:",e);
 		} finally{
 			try {
 				if(inputStream!=null){
@@ -88,7 +93,7 @@ public class PropertiesUtil {
     public static synchronized PropertiesUtil getInstance(String propertiesPath){
     	PropertiesUtil propertiesUtil = propertiesUtilsHolder.get(propertiesPath);
     	if(null==propertiesUtil){
-    		LogUtil.info("PropertiesUtil instance is null with propertiesPath={},will new a instance directly",propertiesPath);
+    		LOGGER.info("PropertiesUtil instance is null with propertiesPath={},will new a instance directly",propertiesPath);
 			InputStream inputStream = null;
 			try{
 				propertiesUtil = new PropertiesUtil();
@@ -99,11 +104,11 @@ public class PropertiesUtil {
 					propertiesUtilsHolder.put(propertiesPath, propertiesUtil);
 					propertiesMap.put(propertiesUtil, properties);
 
-					LogUtil.info("PropertiesUtil instance init success");
+					LOGGER.info("PropertiesUtil instance init success");
 					propertiesUtil.propertiesLoaded = true;
 				}
 			} catch (Exception e) {
-				LogUtil.error("getInstance occur error,cause:",e);
+				LOGGER.error("getInstance occur error,cause:",e);
 			} finally{
 				try {
 					if(inputStream!=null){
