@@ -1,9 +1,11 @@
-package io.antfs.zk;
+package io.antfs.bootstrap;
 
 import com.alibaba.fastjson.JSON;
 import com.xiaoleilu.hutool.io.FileUtil;
 import com.xiaoleilu.hutool.util.CollectionUtil;
 import com.xiaoleilu.hutool.util.StrUtil;
+import io.antfs.zk.ZkConfig;
+import io.antfs.zk.ZkServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +28,7 @@ public class ZkBootstrap {
 
     public static void main(String[] args) {
         String zkCfg = DEFAULT_ZK_CFG;
-        // read out cfg
+        // read cfg from args
         if(args.length>0 && StrUtil.isNotBlank(args[0])){
             zkCfg = args[0];
         }
@@ -50,12 +52,12 @@ public class ZkBootstrap {
             throw new RuntimeException("zkConfig is null or configs node is empty,please check zk.cfg");
         }
         String model = zkConfig.getModel();
-        // 将zk服务的地址写入文件
+        // write zk server address into file
         zkConfig.writeZkAddressToFile();
-        // 单机模式
+        // standalone mode
         if(ZkConfig.STANDALONE_MODEL.equalsIgnoreCase(model)){
             startStandalone(zkConfig.getConfigs().get(0));
-        // 伪集群模式
+        // fake cluster mode
         }else if(ZkConfig.CLUSTER_MODEL.equalsIgnoreCase(model)){
             startCluster(zkConfig.getConfigs());
         }
@@ -73,7 +75,7 @@ public class ZkBootstrap {
         if(!propertiesFile.exists()){
             FileUtil.touch(propertiesFile);
         }
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         int clientPort = config.getClientPort();
         if(clientPort<=SYSTEM_PORT_UP_RANGE){
             throw new RuntimeException("clientPort should not be less than "+SYSTEM_PORT_UP_RANGE);

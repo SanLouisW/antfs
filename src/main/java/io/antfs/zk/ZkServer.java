@@ -41,16 +41,16 @@ public class ZkServer {
 	public static final String ZOOKEEPER_CLUSTER_PROPERTIES_FILE = BASE_ZOOKEEPER_DIR+"zk_cluster_server_%d.properties";
 
 	/**
-	 * zk server address
+	 * zk server address read from zk_address.cfg
 	 */
-	private static String ZK_SERVER_ADDRESS;
+	private static String ZK_SERVER_ADDRESS_READ_FROM_CFG;
 
 
-	public static final String getZkServerAddress(){
-		if(StrUtil.isBlank(ZK_SERVER_ADDRESS)){
-			ZK_SERVER_ADDRESS = FileUtil.readUtf8String(new File(ZOOKEEPER_ADDRESS_CFG).getPath());
+	public static final String readZkServerAddress(){
+		if(StrUtil.isBlank(ZK_SERVER_ADDRESS_READ_FROM_CFG)){
+			ZK_SERVER_ADDRESS_READ_FROM_CFG = FileUtil.readUtf8String(new File(ZOOKEEPER_ADDRESS_CFG).getPath());
 		}
-		return ZK_SERVER_ADDRESS;
+		return ZK_SERVER_ADDRESS_READ_FROM_CFG;
 	}
 
 	/**

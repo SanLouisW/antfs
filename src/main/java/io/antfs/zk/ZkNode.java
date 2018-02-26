@@ -6,13 +6,13 @@ package io.antfs.zk;
  **/
 public class ZkNode {
 
-    /** the path where Proxy registered to */
-    public static final String PROXY_PATH = "/proxy";
+    /** the path where queen node registered to */
+    public static final String QUEEN_PATH = "/queen";
 
-    /** root path where nodes used to register */
+    /** root path where worker nodes used to register */
     public static final String ROOT_PATH = "/root";
 
-    /** the path where Node registered to */
-    public static final String NODE_PATH = ROOT_PATH + "/node";
+    /** the path where worker node registered to */
+    public static final String WORKER_PATH = ROOT_PATH + "/worker";
 
 }
