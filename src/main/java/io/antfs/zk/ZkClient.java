@@ -6,8 +6,6 @@ import org.apache.curator.retry.RetryNTimes;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * generate ZkClient
@@ -29,11 +27,11 @@ public class ZkClient {
      */
     private static Map<String,CuratorFramework> clients;
 
-    private static Lock lock;
+    private static final Object LOCK;
 
     static{
         clients = new ConcurrentHashMap<>();
-        lock = new ReentrantLock();
+        LOCK = new Object();
     }
 
     /**
@@ -47,8 +45,7 @@ public class ZkClient {
         }
         CuratorFramework client = clients.get(zkServerAddress);
         if(client==null){
-            lock.lock();
-            try {
+            synchronized (LOCK){
                 if(!clients.containsKey(zkServerAddress)) {
                     client = CuratorFrameworkFactory.newClient(
                             zkServerAddress,
@@ -61,8 +58,6 @@ public class ZkClient {
                 }else{
                     client = clients.get(zkServerAddress);
                 }
-            }finally {
-                lock.unlock();
             }
         }
         return client;

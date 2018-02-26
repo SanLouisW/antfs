@@ -12,9 +12,9 @@ public class ZkNode {
     public static final String ROOT_NODE_PATH = "/zk";
 
     /**
-     * the node where SlaveNode registered to
+     * the path where Node registered to
      */
-    public static final String SLAVE_NODE_PATH = ROOT_NODE_PATH+"/slave";
+    public static final String NODE_PATH = ROOT_NODE_PATH+"/node";
 
 
 
