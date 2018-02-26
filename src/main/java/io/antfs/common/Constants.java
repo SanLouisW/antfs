@@ -28,6 +28,9 @@ public class Constants {
     /** all timeout unit:seconds */
     public static final int ALL_IDLE_TIME_OUT = 7;
 
+    /** heart beat period unit:seconds */
+    public static final int HEART_BEAT_PERIOD = 4;
+
     /** the default AntObject size 4MB */
     public static final int ANT_OBJECT_BUFFER_SIZE = ANT_FS_PROPERTIES.getInt("ant.object.buffer.size",0x400000);
     /** the path where antObject stored in */
