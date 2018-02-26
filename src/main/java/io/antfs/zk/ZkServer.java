@@ -29,7 +29,7 @@ public class ZkServer {
 	 * zk base directory
 	 * used to store properties generated in runtime
 	 */
-	public static final String BASE_ZOOKEEPER_DIR = "/zookeeper/";
+	private static final String BASE_ZOOKEEPER_DIR = "/zookeeper/";
 
 	/**
 	 * store zk server address into this file
@@ -40,17 +40,51 @@ public class ZkServer {
 
 	public static final String ZOOKEEPER_CLUSTER_PROPERTIES_FILE = BASE_ZOOKEEPER_DIR+"zk_cluster_server_%d.properties";
 
+	/** zk server address read from zk_address.cfg */
+	private static String zkServerAddressReadFromCfg;
+
+	/** zk server address read from args */
+	private static String zkServerAddressReadFromArgs;
+
+
 	/**
-	 * zk server address read from zk_address.cfg
+	 * get the zk server address from zk_address.cfg
+	 * @return the zk server address stored in zk_address.cfg
 	 */
-	private static String ZK_SERVER_ADDRESS_READ_FROM_CFG;
-
-
-	public static final String readZkServerAddress(){
-		if(StrUtil.isBlank(ZK_SERVER_ADDRESS_READ_FROM_CFG)){
-			ZK_SERVER_ADDRESS_READ_FROM_CFG = FileUtil.readUtf8String(new File(ZOOKEEPER_ADDRESS_CFG).getPath());
+	public static String getZkAddressFromCfg(){
+		if(StrUtil.isBlank(zkServerAddressReadFromCfg)){
+			zkServerAddressReadFromCfg = FileUtil.readUtf8String(new File(ZOOKEEPER_ADDRESS_CFG).getPath());
 		}
-		return ZK_SERVER_ADDRESS_READ_FROM_CFG;
+		return zkServerAddressReadFromCfg;
+	}
+
+	/**
+	 * set the variable value which stores the zk server address specified in args
+	 * @param addressFromArgs zk server address specified in args
+	 */
+	public static void setZkAddressFromArgs(String addressFromArgs){
+		zkServerAddressReadFromArgs = addressFromArgs;
+	}
+
+	/**
+	 * get the zk server address from args
+	 * @return the zk server address specified in args
+	 */
+	public static String getZkAddressFromArgs(){
+		return zkServerAddressReadFromArgs;
+	}
+
+	/**
+	 * get zk server address
+	 * @return the zk server address
+	 */
+	public static String getZkAddress(){
+		// get zk address from args first
+		String zkAddress = getZkAddressFromArgs();
+		if(StrUtil.isBlank(zkAddress)){
+			zkAddress = getZkAddressFromCfg();
+		}
+		return zkAddress;
 	}
 
 	/**
