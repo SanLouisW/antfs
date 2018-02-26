@@ -1,4 +1,4 @@
-package io.antfs.lang.file;
+package io.antfs.common.lang.file;
 
 import java.io.File;
 

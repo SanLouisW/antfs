@@ -1,9 +1,9 @@
 package io.antfs.file;
 
-import io.antfs.lang.file.DefaultFileHandler;
-import io.antfs.lang.file.FileHandler;
-import io.antfs.lang.object.DefaultObjectReader;
-import io.antfs.lang.object.DefaultObjectWriter;
+import io.antfs.common.lang.file.DefaultFileHandler;
+import io.antfs.common.lang.file.FileHandler;
+import io.antfs.common.lang.object.DefaultObjectReader;
+import io.antfs.common.lang.object.DefaultObjectWriter;
 import org.junit.After;
 import org.junit.Before;
 import org.slf4j.Logger;

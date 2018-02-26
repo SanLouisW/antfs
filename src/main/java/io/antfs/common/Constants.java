@@ -12,14 +12,14 @@ public class Constants {
     private static final String ANT_FS_PROPERTIES_PATH = "/antfs.properties";
     private static final PropertiesUtil ANT_FS_PROPERTIES = PropertiesUtil.getInstance(ANT_FS_PROPERTIES_PATH);
 
-    /** Server port */
-    public static final int SERVER_PORT = ANT_FS_PROPERTIES.getInt("netty.server.port",8889);
+    /** Queen Server Port */
+    public static final int QUEEN_PORT = ANT_FS_PROPERTIES.getInt("queen.server.port",8889);
     /** BossGroup Size */
-    public static final int BOSS_GROUP_SIZE = null!=Integer.getInteger("netty.server.bossGroup.size")?Integer.getInteger("netty.server.bossGroup.size"):ANT_FS_PROPERTIES.getInt("netty.server.bossGroup.size",2);
+    public static final int BOSS_GROUP_SIZE = null!=Integer.getInteger("server.bossGroup.size")?Integer.getInteger("server.bossGroup.size"):ANT_FS_PROPERTIES.getInt("server.bossGroup.size",1);
     /** WorkerGroup Size */
-    public static final int WORKER_GROUP_SIZE = null!=Integer.getInteger("netty.server.workerGroup.size")?Integer.getInteger("netty.server.workerGroup.size"):ANT_FS_PROPERTIES.getInt("netty.server.workerGroup.size",4);
+    public static final int WORKER_GROUP_SIZE = null!=Integer.getInteger("server.workerGroup.size")?Integer.getInteger("server.workerGroup.size"):ANT_FS_PROPERTIES.getInt("server.workerGroup.size",4);
     /** the maxContentLength which set to HttpObjectAggregator */
-    public static final int MAX_CONTENT_LENGTH = ANT_FS_PROPERTIES.getInt("netty.maxContentLength",10485760);
+    public static final int MAX_CONTENT_LENGTH = ANT_FS_PROPERTIES.getInt("netty.max.content.length",10485760);
 
     /** read timeout unit:seconds */
     public static final int READ_IDLE_TIME_OUT = 4;

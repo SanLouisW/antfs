@@ -1,7 +1,7 @@
-package io.antfs.lang.file;
+package io.antfs.common.lang.file;
 
-import io.antfs.lang.object.AntMetaObject;
-import io.antfs.lang.object.AntObject;
+import io.antfs.common.lang.object.AntMetaObject;
+import io.antfs.common.lang.object.AntObject;
 
 /**
  * FileStorerListener

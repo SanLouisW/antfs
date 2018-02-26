@@ -1,8 +1,8 @@
-package io.antfs.lang.file;
+package io.antfs.common.lang.file;
 
-import io.antfs.lang.object.AntMetaObject;
-import io.antfs.lang.object.AntObject;
-import io.antfs.lang.object.ObjectHandler;
+import io.antfs.common.lang.object.AntMetaObject;
+import io.antfs.common.lang.object.AntObject;
+import io.antfs.common.lang.object.ObjectHandler;
 import io.netty.util.concurrent.DefaultThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

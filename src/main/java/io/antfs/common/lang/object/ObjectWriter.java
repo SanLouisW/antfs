@@ -1,4 +1,4 @@
-package io.antfs.lang.object;
+package io.antfs.common.lang.object;
 
 /**
  * @author gris.wang

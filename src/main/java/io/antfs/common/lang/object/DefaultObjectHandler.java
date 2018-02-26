@@ -1,4 +1,4 @@
-package io.antfs.lang.object;
+package io.antfs.common.lang.object;
 
 import io.antfs.common.Constants;
 import org.apache.commons.codec.digest.DigestUtils;
