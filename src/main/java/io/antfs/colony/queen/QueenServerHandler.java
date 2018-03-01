@@ -1,6 +1,7 @@
 package io.antfs.colony.queen;
 
 import io.antfs.common.Constants;
+import io.antfs.protocol.MsgType;
 import io.antfs.protocol.Packet;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -32,7 +33,14 @@ public class QueenServerHandler extends ChannelInboundHandlerAdapter {
         if(msg instanceof HttpRequest){
             handleHttpRequest(ctx,(HttpRequest)msg);
         }else if(msg instanceof Packet){
-            ctx.fireChannelRead(msg);
+            Packet packet = (Packet)msg;
+            // handle common packet
+            if(packet.getHeader().getMsgType()!= MsgType.HEARTBEAT.getVal()){
+                handlePacket(packet);
+            }else {
+                // handle heart beat
+                ctx.fireChannelRead(msg);
+            }
         }
     }
 
@@ -59,6 +67,10 @@ public class QueenServerHandler extends ChannelInboundHandlerAdapter {
         ByteBuf byteBuf = Unpooled.copiedBuffer("welcome to antfs",CharsetUtil.UTF_8);
         Object response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, byteBuf);
         writeResponse(response);
+    }
+
+    private void handlePacket(Packet packet){
+        // TODO handle common packet
     }
 
     /**
