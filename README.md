@@ -15,12 +15,19 @@
 - **ZooKeeper**：注册中心。Queen和Worker注册到ZK，Worker自动发现Queen并进行heartbeat，Worker自动发现其他Worker并进行数据同步
 
 系统的执行流程如下：
+
 1.启动一个Zk集群，或使用已存在的Zk
+
 2.启动Queen，将自己注册到zk上去，路径为/queen，节点类型为临时节点
+
 3.启动Worker，将字节注册到zk上去，路径为/root/worker，节点类型为临时顺序节点
+
 4.Worker到/queen下获取Queen节点，通过netty与Queen进行heartbeat
+
 5.Client调用Queen，进行文件的store或者restore操作
+
 6.Queen将指令转发到具体的Worker
+
 7.Worker进行相关的任务执行，并按条件进行数据的同步
 
 其中，各组件之间通过自定义协议进行通讯，定义一个数据包Packet，如下：
