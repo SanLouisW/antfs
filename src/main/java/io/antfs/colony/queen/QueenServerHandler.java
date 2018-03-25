@@ -34,12 +34,12 @@ public class QueenServerHandler extends ChannelInboundHandlerAdapter {
             handleHttpRequest(ctx,(HttpRequest)msg);
         }else if(msg instanceof Packet){
             Packet packet = (Packet)msg;
-            // handle common packet
-            if(packet.getHeader().getMsgType()!= MsgType.HEARTBEAT.getVal()){
-                handlePacket(packet);
-            }else {
-                // handle heart beat
+            // handle heart beat
+            if(packet.getHeader().getMsgType()== MsgType.HEARTBEAT.getType()){
                 ctx.fireChannelRead(msg);
+            // handle common packet
+            }else {
+                handlePacket(ctx,packet);
             }
         }
     }
@@ -69,8 +69,10 @@ public class QueenServerHandler extends ChannelInboundHandlerAdapter {
         writeResponse(response);
     }
 
-    private void handlePacket(Packet packet){
+    private void handlePacket(ChannelHandlerContext ctx,Packet packet){
         // TODO handle common packet
+        QueenPacketSender packetSender = new QueenPacketSender(ctx, packet);
+        packetSender.sendPacket();
     }
 
     /**

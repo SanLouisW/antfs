@@ -1,5 +1,6 @@
 package io.antfs.colony.worker;
 
+import io.antfs.protocol.Packet;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -11,13 +12,13 @@ import org.slf4j.LoggerFactory;
  * @author gris.wang
  * @since 2017/11/22
  */
-public class WorkerServerHandler extends SimpleChannelInboundHandler {
+public class WorkerServerHandler extends SimpleChannelInboundHandler<Packet> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WorkerServerHandler.class);
     
     @Override
-    public void channelRead0(ChannelHandlerContext ctx, Object msg) {
-        Object response = handleResponse(msg);
+    public void channelRead0(ChannelHandlerContext ctx, Packet msg) {
+        Object response = handlePacket(msg);
         ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
     }
 
@@ -28,8 +29,10 @@ public class WorkerServerHandler extends SimpleChannelInboundHandler {
     }
 
 
-    public Object handleResponse(Object msg){
-        return msg;
+    private Object handlePacket(Packet packet){
+        Object response = new Object();
+
+        return response;
     }
 
     public void afterReadComplete(){

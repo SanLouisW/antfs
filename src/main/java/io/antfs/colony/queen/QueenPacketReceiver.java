@@ -6,11 +6,11 @@ import io.netty.channel.*;
  * @author gris.wang
  * @since 2018/1/18
  **/
-public class ProxyServerBackendHandler extends ChannelInboundHandlerAdapter {
+public class QueenPacketReceiver extends ChannelInboundHandlerAdapter {
 
     private final Channel inboundChannel;
 
-    public ProxyServerBackendHandler(Channel inboundChannel){
+    public QueenPacketReceiver(Channel inboundChannel){
         this.inboundChannel = inboundChannel;
     }
 
@@ -35,13 +35,13 @@ public class ProxyServerBackendHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
-        ProxyServerHandler.closeOnFlush(inboundChannel);
+        QueenPacketSender.closeOnFlush(inboundChannel);
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         cause.printStackTrace();
-        ProxyServerHandler.closeOnFlush(ctx.channel());
+        QueenPacketSender.closeOnFlush(ctx.channel());
     }
 
 

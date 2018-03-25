@@ -38,15 +38,17 @@ public class PacketEncoder extends MessageToByteEncoder<Packet> {
 			throw new Exception("the encode message is null");
 		}
 		Packet.Header header = msg.getHeader();
-		int len = header.getLen();
 		out.writeByte(header.getMagic());
 		out.writeByte(header.getMsgType());
+		out.writeLong(header.getChunkSize());
+		out.writeLong(header.getChunkStart());
+		out.writeLong(header.getChunkEnd());
+		int len = header.getLen();
 		out.writeInt(len);
 
 		if(len>0) {
-			String body = msg.getBody();
-			byte[] bytes = body.getBytes(CharsetUtil.UTF_8);
-			out.writeBytes(bytes);
+			byte[] body = msg.getBody();
+			out.writeBytes(body);
 		}
 	}
 

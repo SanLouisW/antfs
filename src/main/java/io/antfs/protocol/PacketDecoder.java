@@ -32,7 +32,7 @@ public class PacketDecoder extends LengthFieldBasedFrameDecoder {
 			LOGGER.info("ByteBuf is null");
 			return null;
 		}
-		// response header is 6 bytes
+		// response header is 30 bytes
 		if (in.readableBytes() < Packet.HEADER_SIZE) {
 			LOGGER.info("ByteBuf length is less than packet header size");
 			return null;
@@ -40,6 +40,9 @@ public class PacketDecoder extends LengthFieldBasedFrameDecoder {
 
 		byte magic = in.readByte();
 		byte msgType = in.readByte();
+		long chunkSize = in.readLong();
+		long chunkStart = in.readLong();
+		long chunkEnd = in.readLong();
 		int len = in.readInt();
 		// until we have the entire payload return
 		if (in.readableBytes() < len) {
@@ -48,12 +51,11 @@ public class PacketDecoder extends LengthFieldBasedFrameDecoder {
 		}
 
 		ByteBuf bodyBuf = in.readBytes(len);
-		byte[] bytes = new byte[bodyBuf.readableBytes()];
-		bodyBuf.readBytes(bytes);
-		String body = new String(bytes,CharsetUtil.UTF_8);
+		byte[] body = new byte[bodyBuf.readableBytes()];
+		bodyBuf.readBytes(body);
 
 		Packet packet = new Packet();
-		Packet.Header header = new Packet.Header(magic,msgType,len);
+		Packet.Header header = new Packet.Header(magic,msgType,chunkSize,chunkStart,chunkEnd,len);
 		packet.setHeader(header);
 		packet.setBody(body);
 		return packet;
