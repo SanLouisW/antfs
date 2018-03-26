@@ -25,17 +25,19 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 public class QueenServerHandler extends ChannelInboundHandlerAdapter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(QueenServerHandler.class);
-    
+    private static final ByteBuf BUF = Unpooled.copiedBuffer("{\"file store\":\""+Constants.FILE_STORE_URI+"?path={path}\",\"file restore\":\""+Constants.FILE_RESTORE_URI+"?fid={fid}\"}",CharsetUtil.UTF_8);
+    public static final String CONTENT_TYPE_JSON = "application/json;charset=UTF-8";
     private ChannelHandlerContext ctx;
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
+        this.ctx = ctx;
         if(msg instanceof HttpRequest){
             handleHttpRequest(ctx,(HttpRequest)msg);
         }else if(msg instanceof Packet){
             Packet packet = (Packet)msg;
             // handle heart beat
-            if(packet.getHeader().getMsgType()== MsgType.HEARTBEAT.getType()){
+            if(packet.getHeader().getMsgType()==MsgType.HEARTBEAT.getType()){
                 ctx.fireChannelRead(msg);
             // handle common packet
             }else {
@@ -62,10 +64,15 @@ public class QueenServerHandler extends ChannelInboundHandlerAdapter {
         if (HttpUtil.is100ContinueExpected(request)) {
             ctx.write(new DefaultFullHttpResponse(HTTP_1_1, CONTINUE));
         }
-        this.ctx = ctx;
+        String uri = request.uri();
+        if(Constants.FILE_RESTORE_URI.equals(uri)){
 
-        ByteBuf byteBuf = Unpooled.copiedBuffer("welcome to antfs",CharsetUtil.UTF_8);
-        Object response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, byteBuf);
+        }else if(Constants.FILE_RESTORE_URI.equals(uri)){
+
+        }else{
+        }
+        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, BUF);
+        response.headers().add(HttpHeaderNames.CONTENT_TYPE, CONTENT_TYPE_JSON);
         writeResponse(response);
     }
 

@@ -26,6 +26,15 @@ public class NodeWareHouse {
     }
 
     /**
+     * whether the node exists or not
+     * @param id the node id
+     * @return true if exists
+     */
+    public static boolean nodeExists(String id){
+        return nodeMap.containsKey(id);
+    }
+
+    /**
      * add node
      * @param id the id
      * @param node the node

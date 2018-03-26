@@ -2,6 +2,8 @@ package io.antfs.colony.queen;
 
 import io.antfs.colony.node.Node;
 import io.antfs.common.Constants;
+import io.antfs.protocol.MsgType;
+import io.antfs.protocol.Packet;
 import io.antfs.warehouse.NodeWareHouse;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -38,30 +40,46 @@ public class HeartbeatServerHandler extends ChannelInboundHandlerAdapter {
 
 	@Override
 	public void channelActive(ChannelHandlerContext ctx) throws Exception {
-		Node workerNode = parseNode(ctx);
-		if(workerNode==null) {
-			LOGGER.error("workerNode parse from ctx is null");
-			return;
-		}
-		LOGGER.info("A new worker={} has connected to queen,will add it to NodeWareHouse",workerNode);
-		NodeWareHouse.addNode(workerNode.getId(), workerNode);
+//		Node workerNode = parseNode(ctx);
+//		if(workerNode==null) {
+//			LOGGER.error("workerNode parse from ctx is null");
+//			return;
+//		}
+//		LOGGER.info("A new worker={} has connected to queen,will add it to NodeWareHouse",workerNode);
+//		NodeWareHouse.addNode(workerNode.getId(), workerNode);
 	}
 
 	@Override
 	public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-		Node workerNode = parseNode(ctx);
-		if(workerNode==null) {
-			LOGGER.error("workerNode parse from ctx is null");
-			return;
-		}
-		LOGGER.warn("the Worker={} is inactive will remove the Node",workerNode);
-		NodeWareHouse.removeNode(workerNode.getId());
+//		Node workerNode = parseNode(ctx);
+//		if(workerNode==null) {
+//			LOGGER.error("workerNode parse from ctx is null");
+//			return;
+//		}
+//		LOGGER.warn("the Worker={} is inactive will remove the Node",workerNode);
+//		NodeWareHouse.removeNode(workerNode.getId());
 	}
 
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-		LOGGER.debug("Worker={} send Queen a msg={}",ctx.channel().remoteAddress(),msg.toString());
-		idleCounter = 0;
+		if(msg instanceof Packet){
+			Packet packet = (Packet)msg;
+			// handle heart beat
+			if(packet.getHeader().getMsgType()== MsgType.HEARTBEAT.getType()){
+				Node workerNode = parseNode(ctx);
+				LOGGER.info("A new worker={} has connected to queen,will add it to NodeWareHouse",workerNode);
+				if(workerNode==null) {
+					LOGGER.error("workerNode parse from ctx is null");
+					return;
+				}
+				String id = workerNode.getId();
+				if(!NodeWareHouse.nodeExists(id)){
+					LOGGER.debug("Worker={} send Queen a msg={}",ctx.channel().remoteAddress(),msg.toString());
+					NodeWareHouse.addNode(id, workerNode);
+				}
+				idleCounter = 0;
+			}
+		}
 	}
 
 	@Override

@@ -21,6 +21,11 @@ public class QueenPacketReceiver extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(final ChannelHandlerContext ctx, Object msg) {
+
+        writeBackToInbound(ctx, msg);
+    }
+
+    private void writeBackToInbound(final ChannelHandlerContext ctx, Object msg){
         inboundChannel.writeAndFlush(msg).addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture future) {

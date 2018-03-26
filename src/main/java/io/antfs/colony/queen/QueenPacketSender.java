@@ -74,14 +74,14 @@ public class QueenPacketSender {
                                     // was able to flush out data, start to read the next chunk
                                     inboundChannel.read();
                                 } else {
-                                    LOGGER.error("write to backend {}:{} error,cause:{}", node.getHost(), node.getPort(),future.cause());
+                                    LOGGER.error("write to remote server {}:{} error,cause:{}", node.getHost(), node.getPort(),future.cause());
                                     future.channel().close();
                                 }
                             }
                         });
                     }
                 } else {
-                    LOGGER.error("connect to backend {}:{} error,cause:{}", node.getHost(), node.getPort(),future.cause());
+                    LOGGER.error("connect to remote server {}:{} error,cause:{}", node.getHost(), node.getPort(),future.cause());
                     // Close the connection if the connection attempt has failed.
                     inboundChannel.close();
                 }
