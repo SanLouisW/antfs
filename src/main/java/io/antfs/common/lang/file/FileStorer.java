@@ -51,7 +51,7 @@ public class FileStorer {
 
 	private AntMetaObject antMetaObject;
 	
-	private FileStorer(File file, String fid, ObjectHandler objectHandler, int bufferSize){
+	public FileStorer(File file, String fid, ObjectHandler objectHandler, int bufferSize){
 		this.fileLength = file.length();
 		this.fid = fid;
 		this.objectHandler = objectHandler;
@@ -64,7 +64,7 @@ public class FileStorer {
 		}
 		this.executorService = new ThreadPoolExecutor(this.threadSize,100,0L,TimeUnit.MILLISECONDS,
 										new LinkedBlockingDeque<>(1024),
-										new DefaultThreadFactory("store-pool-thread"),
+										new DefaultThreadFactory("start-pool-thread"),
 										new ThreadPoolExecutor.AbortPolicy());
 		this.readPointers = new HashSet<>();
 		this.antMetaObject = new AntMetaObject(this.fid,file.getName());
@@ -133,9 +133,9 @@ public class FileStorer {
 	}
 
 	/**
-	 * start the service
+	 * store the object
 	 */
-	public void start(){
+	public void store(){
 		// prepare the read pointer
 		calculateReadPointer(0, this.bufferSize);
 		LOGGER.info("readPointers={}",this.readPointers);
@@ -150,7 +150,7 @@ public class FileStorer {
             shutdown();
         });
 		for(ReadPointer readPointer: this.readPointers){
-			this.executorService.execute(new FileReader(readPointer));
+			this.executorService.execute(new AntObjectWriter(readPointer));
 		}
 	}
 
@@ -212,19 +212,19 @@ public class FileStorer {
 		}
 	}
 
-	/* ============== the FileReader =============== */
+	/* ============== the AntObjectWriter =============== */
 
-	private class FileReader implements Runnable{
+	private class AntObjectWriter implements Runnable{
 
 		private ReadPointer readPointer;
 
 		private byte[] readBuff;
 
 		/**
-		 * FileReader
+		 * AntObjectWriter
 		 * @param readPointer the ReadPointer
 		 */
-		FileReader(ReadPointer readPointer) {
+		AntObjectWriter(ReadPointer readPointer) {
 			this.readPointer = readPointer;
 			this.readBuff = new byte[bufferSize];
 		}
@@ -248,42 +248,12 @@ public class FileStorer {
 				handleObject(new AntObject(fid,this.readPointer.oid,start,end,content));
 				cyclicBarrier.await();
 			}catch (Exception e) {
-				e.printStackTrace();
+				LOGGER.error("AntObjectWriter error,cause:",e);
 			}
 		}
 
 	}
 
-	/* ============== the FileStorer Builder =============== */
-
-	public static class Builder{
-
-		private File file;
-
-		private String fid;
-
-		private ObjectHandler objectHandler;
-
-		private int bufferSize = 0x400000;
-
-		public Builder(File file,String fid,ObjectHandler objectHandler){
-			this.file = file;
-			if(!this.file.exists() || this.file.isDirectory()) {
-				throw new IllegalArgumentException("file does not exist or is not a file!");
-			}
-			this.fid = fid;
-			this.objectHandler = objectHandler;
-		}
-
-		public Builder bufferSize(int bufferSize){
-			this.bufferSize = bufferSize;
-			return this;
-		}
-
-		public FileStorer build(){
-			return new FileStorer(this.file,this.fid,this.objectHandler,this.bufferSize);
-		}
-	}
 	
 	
 }

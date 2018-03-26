@@ -64,8 +64,11 @@ public class AntMetaObject implements Serializable{
 
     @Override
     public String toString() {
-        return new StringBuilder().append("{fid:").append(fid)
+        return new StringBuilder().append("{")
+                                  .append("fid:").append(fid)
                                   .append(",fileName:").append(fileName)
-                                  .append(",oids:").append(String.join(",",oids)).append("}").toString();
+                                  .append(",oids:").append(String.join(",",oids))
+                                  .append("}")
+                                  .toString();
     }
 }

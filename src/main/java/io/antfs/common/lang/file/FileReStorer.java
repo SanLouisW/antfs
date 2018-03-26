@@ -15,13 +15,13 @@ import java.io.RandomAccessFile;
 import java.util.concurrent.*;
 
 /**
- * FileRestorer
+ * FileReStorer
  * @author gris.wang
  * @since 2017/12/27
  **/
-public class FileRestorer {
+public class FileReStorer {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(FileRestorer.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(FileReStorer.class);
 	
 	private String fid;
 
@@ -33,7 +33,7 @@ public class FileRestorer {
 
 	private AntMetaObject antMetaObject;
 
-	private FileRestorer(String fid, ObjectReader objectReader){
+	public FileReStorer(String fid, ObjectReader objectReader){
 		this.fid = fid;
 		this.objectReader = objectReader;
 		this.antMetaObject = this.objectReader.readMeta(fid);
@@ -126,7 +126,7 @@ public class FileRestorer {
 					LOGGER.error("antObject read from disk is null,with fid=({}),oid=({})",fid,this.oid);
 				}
 			}catch (Exception e) {
-				e.printStackTrace();
+				LOGGER.error("AntObjectReader error,cause:",e);
 			}finally {
 				if(this.randomAccessFile!=null){
 					try {
@@ -140,24 +140,4 @@ public class FileRestorer {
 		}
 	}
 
-
-	/* ============== the FileRestorer Builder =============== */
-
-	public static class Builder{
-
-		private String fid;
-
-		private ObjectReader objectReader;
-
-		public Builder(String fid,ObjectReader objectReader){
-			this.fid = fid;
-			this.objectReader = objectReader;
-		}
-
-		public FileRestorer build(){
-			return new FileRestorer(this.fid,this.objectReader);
-		}
-	}
-	
-	
 }

@@ -37,10 +37,8 @@ public class DefaultFileHandler implements FileHandler {
         if(StringUtil.isNullOrEmpty(fid)){
             return null;
         }
-        FileStorer.Builder builder = new FileStorer.Builder(file,fid,this.objectWriter);
-        builder.bufferSize(Constants.ANT_OBJECT_BUFFER_SIZE);
 
-        FileStorer fileStorer = builder.build();
+        FileStorer fileStorer = new FileStorer(file,fid,this.objectWriter,Constants.ANT_OBJECT_BUFFER_SIZE);
         fileStorer.addListener(new FileStorerListener() {
             @Override
             public void onMetaObjectReady(AntMetaObject antMetaObject) {
@@ -53,16 +51,15 @@ public class DefaultFileHandler implements FileHandler {
             }
         });
 
-        fileStorer.start();
+        fileStorer.store();
 
         return fid;
     }
 
     @Override
     public File restore(String fid) {
-        FileRestorer.Builder builder = new FileRestorer.Builder(fid,this.objectReader);
-        FileRestorer fileRestorer = builder.build();
-        return fileRestorer.restore();
+        FileReStorer fileReStorer = new FileReStorer(fid,this.objectReader);
+        return fileReStorer.restore();
     }
 
 }

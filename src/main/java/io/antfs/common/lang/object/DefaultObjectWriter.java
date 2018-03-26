@@ -13,7 +13,7 @@ import java.io.ObjectOutputStream;
 public class DefaultObjectWriter extends DefaultObjectHandler implements ObjectWriter {
 
     /**
-     * store the object into disk
+     * start the object into disk
      * @param storePath the path where the object should be stored
      * @param storeFileName the fileName which the object should be stored as
      * @param object the object to be stored

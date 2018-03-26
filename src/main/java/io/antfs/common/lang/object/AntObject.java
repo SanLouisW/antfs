@@ -4,8 +4,8 @@ import java.io.Serializable;
 
 /**
  * A file will be split to one antMetaObject and several antObjects
- * the antMetaObject store the sorted oids which reference the antObject
- * each antObject store a part of the file's content
+ * the antMetaObject start the sorted oids which reference the antObject
+ * each antObject start a part of the file's content
  * except the last antObject each antObject has the same content length
  * @author gris.wang
  * @since 2017/12/25
@@ -87,9 +87,11 @@ public class AntObject implements Serializable{
 
     @Override
     public String toString() {
-        return new StringBuilder().append("{fid:").append(fid)
+        return new StringBuilder().append("{")
+                                  .append("fid:").append(fid)
                                   .append(",oid:").append(oid)
                                   .append(",start:").append(byteStart)
-                                  .append(",end:").append(byteEnd).append("}").toString();
+                                  .append(",end:").append(byteEnd)
+                                  .append("}").toString();
     }
 }
