@@ -1,6 +1,9 @@
 package io.antfs.common;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import io.antfs.common.util.PropertiesUtil;
+import io.netty.handler.codec.http.HttpMethod;
 
 /**
  * @author gris.wang
@@ -23,8 +26,11 @@ public class Constants {
 
     /** file store uri */
     public static final String FILE_STORE_URI = ANT_FS_PROPERTIES.getString("file.store.uri");
+    public static final String FILE_STORE_PARAM = "filePath";
     /** file restore uri */
     public static final String FILE_RESTORE_URI = ANT_FS_PROPERTIES.getString("file.restore.uri");
+    public static final String FILE_RESTORE_PARAM = "fid";
+    public static final JSONObject QUEEN_POST_URI = new JSONObject();
 
     /** the default AntObject size 4MB */
     public static final int ANT_OBJECT_BUFFER_SIZE = ANT_FS_PROPERTIES.getInt("ant.object.buffer.size",0x400000);
@@ -45,7 +51,7 @@ public class Constants {
 
     public static final int MAX_FRAME_LENGTH = Integer.MAX_VALUE;
     /** the bytes offset to len */
-    public static final int LENGTH_FIELD_OFFSET = 26;
+    public static final int LENGTH_FIELD_OFFSET = 2;
     public static final int LENGTH_FIELD_LENGTH = 4;
     public static final int LENGTH_ADJUSTMENT = 0;
     public static final int INITIAL_BYTES_TO_STRIP = 0;
@@ -57,5 +63,18 @@ public class Constants {
     public static final String FAVICON_ICO = "/favicon.ico";
     public static final String CONNECTION_KEEP_ALIVE = "keep-alive";
     public static final String CONNECTION_CLOSE = "close";
+
+
+    static{
+        JSONObject store = new JSONObject();
+        store.put("uri",FILE_STORE_URI);
+        store.put("param",FILE_STORE_PARAM);
+        JSONObject restore = new JSONObject();
+        restore.put("uri",FILE_RESTORE_URI);
+        restore.put("param",FILE_RESTORE_PARAM);
+        QUEEN_POST_URI.put("method", HttpMethod.POST.toString());
+        QUEEN_POST_URI.put("store",store);
+        QUEEN_POST_URI.put("restore",restore);
+    }
 
 }

@@ -62,6 +62,7 @@ public final class QueenServer {
             ChannelPipeline pipeline = ch.pipeline();
 
             pipeline.addLast(new HttpServerCodec());
+            pipeline.addLast(new HttpObjectAggregator(Constants.MAX_CONTENT_LENGTH));
             pipeline.addLast(new PacketDecoder(Constants.MAX_FRAME_LENGTH,Constants.LENGTH_FIELD_OFFSET,Constants.LENGTH_FIELD_LENGTH,Constants.LENGTH_ADJUSTMENT, Constants.INITIAL_BYTES_TO_STRIP));
             pipeline.addLast(new PacketEncoder());
             pipeline.addLast(new QueenServerHandler());

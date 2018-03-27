@@ -16,52 +16,78 @@ public enum MsgType {
     /**
      * file store
      * from client to queen
-     * from queen to worker
      */
-    STORE((byte)0x02),
+    FILE_STORE((byte)0x01),
 
     /**
      * file store reply
-     * from worker to queen
+     * from queen to client
      */
-    STORE_REPLY((byte)0x03),
+    FILE_STORE_REPLY((byte)0x02),
+
+    /**
+     * chunk store
+     * from client to queen
+     * from queen to worker
+     */
+    CHUNK_STORE((byte)0x03),
+
+    /**
+     * chunk store reply
+     * from worker to queen
+     * from queen to client
+     */
+    CHUNK_STORE_REPLY((byte)0x04),
 
     /**
      * file restore
      * from client to queen
-     * from queen to worker
      */
-    RESTORE((byte)0x05),
+    FILE_RESTORE((byte)0x05),
 
     /**
      * file restore reply
+     * from queen to client
+     */
+    FILE_RESTORE_REPLY((byte)0x06),
+
+    /**
+     * chunk restore
+     * from client to queen
+     * from queen to worker
+     */
+    CHUNK_RESTORE((byte)0x07),
+
+    /**
+     * chunk restore reply
      * from worker to queen
+     * from queen to client
      */
-    RESTORE_REPLY((byte)0x06),
+    CHUNK_RESTORE_REPLY((byte)0x08),
 
     /**
-     * file chunk replication
+     * chunk replication
      * from worker to worker
      */
-    REPLICA((byte)0x08),
+    CHUNK_REPLICA((byte)0x09),
 
     /**
-     * file chunk replication reply
+     * chunk replication reply
      * from worker to worker
      */
-    REPLICA_REPLY((byte)0x09),
+    CHUNK_REPLICA_REPLY((byte)0x10),
 
     /**
      * file meta sync
      * from queen to worker
      */
-    SYNC((byte)0x11),
+    META_SYNC((byte)0x11),
 
     /**
      * file meta sync reply
      * from worker to queen
      */
-    SYNC_REPLY((byte)0x12);
+    META_SYNC_REPLY((byte)0x12);
 
     private byte type;
 

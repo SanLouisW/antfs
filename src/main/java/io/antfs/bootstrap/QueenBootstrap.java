@@ -31,7 +31,7 @@ public class QueenBootstrap {
         }
 
         // register queen node to zk
-        DefaultRegister.create(zkServerAddress).register(new Node(Constants.QUEEN_PORT), ZkNode.QUEEN_PATH, CreateMode.EPHEMERAL);
+//        DefaultRegister.create(zkServerAddress).register(new Node(Constants.QUEEN_PORT), ZkNode.QUEEN_PATH, CreateMode.EPHEMERAL);
 
         // start the queen server
         QueenServer queenServer = new QueenServer();

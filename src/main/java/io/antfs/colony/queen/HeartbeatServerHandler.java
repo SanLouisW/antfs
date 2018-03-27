@@ -11,7 +11,6 @@ import io.netty.handler.timeout.IdleStateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
@@ -37,31 +36,9 @@ public class HeartbeatServerHandler extends ChannelInboundHandlerAdapter {
 		return null;
 	}
 
-
-	@Override
-	public void channelActive(ChannelHandlerContext ctx) throws Exception {
-//		Node workerNode = parseNode(ctx);
-//		if(workerNode==null) {
-//			LOGGER.error("workerNode parse from ctx is null");
-//			return;
-//		}
-//		LOGGER.info("A new worker={} has connected to queen,will add it to NodeWareHouse",workerNode);
-//		NodeWareHouse.addNode(workerNode.getId(), workerNode);
-	}
-
-	@Override
-	public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-//		Node workerNode = parseNode(ctx);
-//		if(workerNode==null) {
-//			LOGGER.error("workerNode parse from ctx is null");
-//			return;
-//		}
-//		LOGGER.warn("the Worker={} is inactive will remove the Node",workerNode);
-//		NodeWareHouse.removeNode(workerNode.getId());
-	}
-
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+		LOGGER.info("[HeartbeatServerHandler] channelRead msg={}",msg);
 		if(msg instanceof Packet){
 			Packet packet = (Packet)msg;
 			// handle heart beat

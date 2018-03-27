@@ -39,9 +39,6 @@ public class PacketEncoder extends MessageToByteEncoder<Packet> {
 		Packet.Header header = msg.getHeader();
 		out.writeByte(header.getMagic());
 		out.writeByte(header.getMsgType());
-		out.writeLong(header.getChunkSize());
-		out.writeLong(header.getChunkStart());
-		out.writeLong(header.getChunkEnd());
 		int len = header.getLen();
 		out.writeInt(len);
 

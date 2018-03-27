@@ -14,7 +14,7 @@ public class Packet {
     /** the heart beat packet */
     public static final Packet HEART_BEAT_PACKET = new Packet(HEART_BEAT_HEADER,null);
     /** the header size */
-    public static final int HEADER_SIZE = 30;
+    public static final int HEADER_SIZE = 6;
 
     private Header header;
     private byte[] body;
@@ -52,9 +52,6 @@ public class Packet {
                 .append("{")
                 .append("magic=").append(header.getMagic())
                 .append(",msgType=").append(header.getMsgType())
-                .append(",chunkSize=").append(header.getChunkSize())
-                .append(",chunkStart=").append(header.getChunkStart())
-                .append(",chunkEnd=").append(header.getChunkEnd())
                 .append(",len=").append(header.getLen())
                 .append("}")
                 .toString();
@@ -65,12 +62,6 @@ public class Packet {
         private byte magic;
         /** the message type */
         private byte msgType;
-        /** the file chunk size */
-        private long chunkSize;
-        /** the file chunk start */
-        private long chunkStart;
-        /** the file chunk end */
-        private long chunkEnd;
         /** packet body length */
         private int len;
 
@@ -86,24 +77,6 @@ public class Packet {
         public void setMsgType(MsgType msgType) {
             this.msgType = msgType.getType();
         }
-        public long getChunkSize() {
-            return chunkSize;
-        }
-        public void setChunkSize(long chunkSize) {
-            this.chunkSize = chunkSize;
-        }
-        public long getChunkStart() {
-            return chunkStart;
-        }
-        public void setChunkStart(long chunkStart) {
-            this.chunkStart = chunkStart;
-        }
-        public long getChunkEnd() {
-            return chunkEnd;
-        }
-        public void setChunkEnd(long chunkEnd) {
-            this.chunkEnd = chunkEnd;
-        }
         public int getLen() {
             return len;
         }
@@ -116,15 +89,8 @@ public class Packet {
         }
 
         public Header(byte magic,byte msgType,int len){
-            this(magic,msgType,0,0,0,len);
-        }
-
-        public Header(byte magic,byte msgType,long chunkSize,long chunkStart,long chunkEnd,int len){
             this.magic = magic;
             this.msgType = msgType;
-            this.chunkSize = chunkSize;
-            this.chunkStart = chunkStart;
-            this.chunkEnd = chunkEnd;
             this.len = len;
         }
     }
