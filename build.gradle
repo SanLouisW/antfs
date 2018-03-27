@@ -1,4 +1,4 @@
-group 'com.antfs'
+group 'io.antfs'
 version '1.0-SNAPSHOT'
 
 apply plugin: 'java'
