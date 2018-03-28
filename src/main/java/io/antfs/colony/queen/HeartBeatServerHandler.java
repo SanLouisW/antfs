@@ -42,7 +42,7 @@ public class HeartBeatServerHandler extends ChannelInboundHandlerAdapter {
 		if(msg instanceof Packet){
 			Packet packet = (Packet)msg;
 			// handle heart beat
-			if(packet.getHeader().getMsgType()== PacketType.HEART_BEAT.getType()){
+			if(packet.getHeader().getPacketType()== PacketType.HEART_BEAT.getType()){
 				Node workerNode = parseNode(ctx);
 				LOGGER.info("A new worker={} has connected to queen,will add it to NodeWareHouse",workerNode);
 				if(workerNode==null) {

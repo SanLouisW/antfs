@@ -42,7 +42,7 @@ public class QueenServerHandler extends ChannelInboundHandlerAdapter {
         } else if (msg instanceof Packet) {
             Packet packet = (Packet) msg;
             // handle heart beat
-            if (packet.getHeader().getMsgType() == PacketType.HEART_BEAT.getType()) {
+            if (packet.getHeader().getPacketType() == PacketType.HEART_BEAT.getType()) {
                 ctx.fireChannelRead(msg);
             // handle common packet
             } else {
