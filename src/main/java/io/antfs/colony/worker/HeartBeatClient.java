@@ -18,13 +18,13 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * HeartbeatClient
+ * HeartBeatClient
  * @author gris.wang
  * @since 2017/11/20
  **/
-public class HeartbeatClient extends ChannelInboundHandlerAdapter implements Runnable{
+public class HeartBeatClient extends ChannelInboundHandlerAdapter implements Runnable{
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HeartbeatClient.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HeartBeatClient.class);
 
     private static Discovery discovery;
     private static Node queenNode;
@@ -36,7 +36,7 @@ public class HeartbeatClient extends ChannelInboundHandlerAdapter implements Run
     private static final int MAX_RETRY = 3;
     private static Channel channel;
 
-    public HeartbeatClient(){
+    public HeartBeatClient(){
         if(discovery==null){
             LOGGER.warn("discovery is null,can't get queenNode");
             return;
@@ -63,7 +63,7 @@ public class HeartbeatClient extends ChannelInboundHandlerAdapter implements Run
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        LOGGER.error("HeartbeatClient caught exception,cause:{}", cause);
+        LOGGER.error("HeartBeatClient caught exception,cause:{}", cause);
         ctx.close();
     }
 
@@ -99,7 +99,7 @@ public class HeartbeatClient extends ChannelInboundHandlerAdapter implements Run
                     ChannelPipeline pipeline = channel.pipeline();
                     pipeline.addLast(new PacketEncoder());
                     pipeline.addLast(new PacketDecoder(Constants.MAX_FRAME_LENGTH,Constants.LENGTH_FIELD_OFFSET,Constants.LENGTH_FIELD_LENGTH,Constants.LENGTH_ADJUSTMENT, Constants.INITIAL_BYTES_TO_STRIP));
-                    pipeline.addLast(HeartbeatClient.this);
+                    pipeline.addLast(HeartBeatClient.this);
                 }
             });
             bootstrap.option(ChannelOption.TCP_NODELAY, true);
@@ -107,7 +107,7 @@ public class HeartbeatClient extends ChannelInboundHandlerAdapter implements Run
             ChannelFuture future = bootstrap.connect(queenNode.getHost(), queenNode.getPort()).sync();
             channel = future.channel();
         }catch(InterruptedException e){
-            LOGGER.error("HeartbeatClient doConnect to queen error,cause:",e);
+            LOGGER.error("HeartBeatClient doConnect to queen error,cause:",e);
         }
     }
 

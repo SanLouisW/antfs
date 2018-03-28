@@ -1,6 +1,5 @@
 package io.antfs.common;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import io.antfs.common.util.PropertiesUtil;
 import io.netty.handler.codec.http.HttpMethod;
@@ -30,7 +29,7 @@ public class Constants {
     /** file restore uri */
     public static final String FILE_RESTORE_URI = ANT_FS_PROPERTIES.getString("file.restore.uri");
     public static final String FILE_RESTORE_PARAM = "fid";
-    public static final JSONObject QUEEN_POST_URI = new JSONObject();
+    public static final JSONObject QUEEN_POST_URI_TIP = new JSONObject();
 
     /** the default AntObject size 4MB */
     public static final int ANT_OBJECT_BUFFER_SIZE = ANT_FS_PROPERTIES.getInt("ant.object.buffer.size",0x400000);
@@ -72,9 +71,9 @@ public class Constants {
         JSONObject restore = new JSONObject();
         restore.put("uri",FILE_RESTORE_URI);
         restore.put("param",FILE_RESTORE_PARAM);
-        QUEEN_POST_URI.put("method", HttpMethod.POST.toString());
-        QUEEN_POST_URI.put("store",store);
-        QUEEN_POST_URI.put("restore",restore);
+        QUEEN_POST_URI_TIP.put("method", HttpMethod.POST.toString());
+        QUEEN_POST_URI_TIP.put("store",store);
+        QUEEN_POST_URI_TIP.put("restore",restore);
     }
 
 }

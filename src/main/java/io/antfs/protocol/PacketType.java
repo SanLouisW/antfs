@@ -1,17 +1,17 @@
 package io.antfs.protocol;
 
 /**
- * the message type of a packet
+ * the type of a Packet
  * @author gris.wang
  * @since 2018/2/26
  **/
-public enum MsgType {
+public enum PacketType {
 
     /**
      * heart beat
      * from worker to queen
      */
-    HEARTBEAT((byte)0x00),
+    HEART_BEAT((byte)0x00),
 
     /**
      * file store
@@ -91,7 +91,7 @@ public enum MsgType {
 
     private byte type;
 
-    MsgType(byte type){
+    PacketType(byte type){
         this.type = type;
     }
 
@@ -99,13 +99,22 @@ public enum MsgType {
         return type;
     }
 
-    public static MsgType getByType(byte type){
-        for(MsgType msgType : values()){
-            if(msgType.getType()==type){
-                return msgType;
+    public static PacketType getByType(byte type){
+        for(PacketType packetType : values()){
+            if(packetType.getType()==type){
+                return packetType;
             }
         }
         return null;
+    }
+
+    public static boolean validPacketType(byte type){
+        for(PacketType packetType : values()){
+            if(packetType.getType()==type){
+                return true;
+            }
+        }
+        return false;
     }
 
 }

@@ -2,7 +2,7 @@ package io.antfs.colony.queen;
 
 import io.antfs.colony.node.Node;
 import io.antfs.common.Constants;
-import io.antfs.protocol.MsgType;
+import io.antfs.protocol.PacketType;
 import io.antfs.protocol.Packet;
 import io.antfs.warehouse.NodeWareHouse;
 import io.netty.channel.ChannelHandlerContext;
@@ -19,9 +19,9 @@ import java.net.SocketAddress;
  * @author gris.wang
  * @since 2017/11/20
  */
-public class HeartbeatServerHandler extends ChannelInboundHandlerAdapter {
+public class HeartBeatServerHandler extends ChannelInboundHandlerAdapter {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(HeartbeatServerHandler.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(HeartBeatServerHandler.class);
 
 	private int idleCounter;
 
@@ -38,11 +38,11 @@ public class HeartbeatServerHandler extends ChannelInboundHandlerAdapter {
 
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-		LOGGER.info("[HeartbeatServerHandler] channelRead msg={}",msg);
+		LOGGER.info("[HeartBeatServerHandler] channelRead msg={}",msg);
 		if(msg instanceof Packet){
 			Packet packet = (Packet)msg;
 			// handle heart beat
-			if(packet.getHeader().getMsgType()== MsgType.HEARTBEAT.getType()){
+			if(packet.getHeader().getMsgType()== PacketType.HEART_BEAT.getType()){
 				Node workerNode = parseNode(ctx);
 				LOGGER.info("A new worker={} has connected to queen,will add it to NodeWareHouse",workerNode);
 				if(workerNode==null) {
@@ -95,7 +95,7 @@ public class HeartbeatServerHandler extends ChannelInboundHandlerAdapter {
 
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-		LOGGER.error("HeartbeatServerHandler caught exception,cause:{}", cause);
+		LOGGER.error("HeartBeatServerHandler caught exception,cause:{}", cause);
 		ctx.close();
 	}
 

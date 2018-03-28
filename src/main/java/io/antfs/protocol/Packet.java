@@ -10,9 +10,9 @@ public class Packet {
     /** the default magic number */
     public static final byte MAGIC = 0x13;
     /** the heart beat header */
-    public static final Header HEART_BEAT_HEADER = new Header(MAGIC,MsgType.HEARTBEAT.getType());
+    public static final Header HEART_BEAT_HEADER = new Header(Packet.MAGIC, PacketType.HEART_BEAT.getType());
     /** the heart beat packet */
-    public static final Packet HEART_BEAT_PACKET = new Packet(HEART_BEAT_HEADER,null);
+    public static final Packet HEART_BEAT_PACKET = new Packet(Packet.HEART_BEAT_HEADER,null);
     /** the header size */
     public static final int HEADER_SIZE = 6;
 
@@ -42,26 +42,27 @@ public class Packet {
     }
 
     public boolean validPacket(){
-        return this.header.getMagic() == Packet.MAGIC
-              && MsgType.getByType(this.header.getMsgType())!=null;
+        return this.header != null
+              && this.header.getMagic() == Packet.MAGIC
+              && PacketType.validPacketType(this.header.getPacketType());
     }
 
     @Override
     public String toString() {
-        return new StringBuilder()
-                .append("{")
-                .append("magic=").append(header.getMagic())
-                .append(",msgType=").append(header.getMsgType())
-                .append(",len=").append(header.getLen())
-                .append("}")
-                .toString();
+        StringBuilder sb = new StringBuilder();
+        sb.append("{")
+          .append("magic=").append(header.getMagic())
+          .append(",packetType=").append(header.getPacketType())
+          .append(",len=").append(header.getLen())
+          .append("}");
+        return sb.toString();
     }
 
     public static class Header{
         /** magic number */
         private byte magic;
-        /** the message type */
-        private byte msgType;
+        /** the packet type */
+        private byte packetType;
         /** packet body length */
         private int len;
 
@@ -71,11 +72,11 @@ public class Packet {
         public void setMagic(byte magic) {
             this.magic = magic;
         }
-        public byte getMsgType() {
-            return msgType;
+        public byte getPacketType() {
+            return packetType;
         }
-        public void setMsgType(MsgType msgType) {
-            this.msgType = msgType.getType();
+        public void setPacketType(PacketType packetType) {
+            this.packetType = packetType.getType();
         }
         public int getLen() {
             return len;
@@ -84,13 +85,13 @@ public class Packet {
             this.len = len;
         }
 
-        public Header(byte magic,byte msgType){
-            this(magic,msgType,0);
+        public Header(byte magic,byte packetType){
+            this(magic,packetType,0);
         }
 
-        public Header(byte magic,byte msgType,int len){
+        public Header(byte magic,byte packetType,int len){
             this.magic = magic;
-            this.msgType = msgType;
+            this.packetType = packetType;
             this.len = len;
         }
     }

@@ -46,8 +46,8 @@ public final class WorkerServer {
 
             Channel channel = future.channel();
             // schedule a heartbeat runnable
-            channel.eventLoop().scheduleAtFixedRate(new HeartbeatClient(),0, Constants.HEART_BEAT_PERIOD,TimeUnit.SECONDS);
-            LOGGER.info("HeartbeatClient has scheduled");
+            channel.eventLoop().scheduleAtFixedRate(new HeartBeatClient(),0, Constants.HEART_BEAT_PERIOD,TimeUnit.SECONDS);
+            LOGGER.info("HeartBeatClient has scheduled");
             // wait channel close
             channel.closeFuture().sync();
         } catch (InterruptedException e) {

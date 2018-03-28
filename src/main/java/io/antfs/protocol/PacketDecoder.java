@@ -38,7 +38,7 @@ public class PacketDecoder extends LengthFieldBasedFrameDecoder {
 		}
 
 		byte magic = in.readByte();
-		byte msgType = in.readByte();
+		byte packetType = in.readByte();
 		int len = in.readInt();
 		// until we have the entire payload return
 		if (in.readableBytes() < len) {
@@ -51,7 +51,7 @@ public class PacketDecoder extends LengthFieldBasedFrameDecoder {
 		bodyBuf.readBytes(body);
 
 		Packet packet = new Packet();
-		Packet.Header header = new Packet.Header(magic,msgType,len);
+		Packet.Header header = new Packet.Header(magic,packetType,len);
 		packet.setHeader(header);
 		packet.setBody(body);
 		return packet;

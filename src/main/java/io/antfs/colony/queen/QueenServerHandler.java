@@ -1,20 +1,18 @@
 package io.antfs.colony.queen;
 
+import com.alibaba.fastjson.JSONObject;
 import com.xiaoleilu.hutool.util.CollectionUtil;
 import com.xiaoleilu.hutool.util.StrUtil;
 import io.antfs.common.Constants;
+import io.antfs.common.util.HttpRenderUtil;
 import io.antfs.common.util.HttpRequestUtil;
-import io.antfs.protocol.MsgType;
+import io.antfs.protocol.PacketType;
 import io.antfs.protocol.Packet;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.*;
-import io.netty.util.CharsetUtil;
-import io.netty.util.ReferenceCountUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,8 +31,7 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 public class QueenServerHandler extends ChannelInboundHandlerAdapter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(QueenServerHandler.class);
-    private static final String TIP = Constants.QUEEN_POST_URI.toJSONString();
-    private static final String CONTENT_TYPE_JSON = "application/json;charset=UTF-8";
+    private static final String TIP = Constants.QUEEN_POST_URI_TIP.toJSONString();
     private ChannelHandlerContext ctx;
 
     @Override
@@ -45,7 +42,7 @@ public class QueenServerHandler extends ChannelInboundHandlerAdapter {
         } else if (msg instanceof Packet) {
             Packet packet = (Packet) msg;
             // handle heart beat
-            if (packet.getHeader().getMsgType() == MsgType.HEARTBEAT.getType()) {
+            if (packet.getHeader().getMsgType() == PacketType.HEART_BEAT.getType()) {
                 ctx.fireChannelRead(msg);
             // handle common packet
             } else {
@@ -77,13 +74,16 @@ public class QueenServerHandler extends ChannelInboundHandlerAdapter {
             String uri = request.uri();
             Map<String, List<String>> paramMap = HttpRequestUtil.getParameterMap(request);
             LOGGER.info("uri={},paramMap={}",uri,paramMap);
-            if(uri.contains(Constants.FILE_RESTORE_URI)){
+            if(uri.contains(Constants.FILE_STORE_URI)){
                 List<String> filePaths = paramMap.get(Constants.FILE_STORE_PARAM);
                 String filePath = CollectionUtil.isNotEmpty(filePaths)?filePaths.get(0):"";
                 if(StrUtil.isNotBlank(filePath)){
                     File file = new File(filePath);
                     if(file.exists() && file.isFile()){
 
+                    }else{
+                        responseError("file=["+filePath+"] does not exists!");
+                        return;
                     }
                 }
 
@@ -95,7 +95,7 @@ public class QueenServerHandler extends ChannelInboundHandlerAdapter {
                 }
             }
         }
-        response(Unpooled.copiedBuffer(TIP,CharsetUtil.UTF_8));
+        responseJSON(TIP);
 
     }
 
@@ -105,15 +105,17 @@ public class QueenServerHandler extends ChannelInboundHandlerAdapter {
         packetSender.sendPacket();
     }
 
-    private void response(ByteBuf buf){
-        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, buf);
-        response.headers().add(HttpHeaderNames.CONTENT_TYPE, CONTENT_TYPE_JSON);
+    private void responseError(String error){
+        JSONObject object = new JSONObject();
+        object.put("error",error);
+        responseJSON(object.toJSONString());
+    }
+
+    private void responseJSON(String jsonStr){
+        FullHttpResponse response = HttpRenderUtil.renderJSON(jsonStr);
         writeResponse(response);
     }
 
-    /**
-     * write response to the channel
-     */
     private void writeResponse(Object response){
         ChannelFuture future = ctx.channel().writeAndFlush(response);
         future.addListener(ChannelFutureListener.CLOSE);

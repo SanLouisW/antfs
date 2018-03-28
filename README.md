@@ -47,44 +47,99 @@ public class Packet {
     public static class Header{
         /** magic number */
         private byte magic;
-        /** the message type */
-        private byte msgType;
+        /** the packet type */
+        private byte packetType;
         /** packet body length */
         private int len;
         // 省略get、set
     }
 }
 ```
-MsgType定义如下：
+
+PacketType定义如下：
 ``` java
-public enum MsgType {
+public enum PacketType {
     /**
      * heart beat
      * from worker to queen
      */
-    HEARTBEAT((byte)0x00),
+    HEART_BEAT((byte)0x00),
+
     /**
      * file store
      * from client to queen
-     * from queen to worker
      */
-    STORE((byte)0x03),
+    FILE_STORE((byte)0x01),
+
     /**
-     * file restore
+     * file store reply
+     * from queen to client
+     */
+    FILE_STORE_REPLY((byte)0x02),
+
+    /**
+     * chunk store
      * from client to queen
      * from queen to worker
      */
-    RESTORE((byte)0x04),
+    CHUNK_STORE((byte)0x03),
+
     /**
-     * file chunk replication
+     * chunk store reply
+     * from worker to queen
+     * from queen to client
+     */
+    CHUNK_STORE_REPLY((byte)0x04),
+
+    /**
+     * file restore
+     * from client to queen
+     */
+    FILE_RESTORE((byte)0x05),
+
+    /**
+     * file restore reply
+     * from queen to client
+     */
+    FILE_RESTORE_REPLY((byte)0x06),
+
+    /**
+     * chunk restore
+     * from client to queen
+     * from queen to worker
+     */
+    CHUNK_RESTORE((byte)0x07),
+
+    /**
+     * chunk restore reply
+     * from worker to queen
+     * from queen to client
+     */
+    CHUNK_RESTORE_REPLY((byte)0x08),
+
+    /**
+     * chunk replication
      * from worker to worker
      */
-    REPLICA((byte)0x10),
+    CHUNK_REPLICA((byte)0x09),
+
+    /**
+     * chunk replication reply
+     * from worker to worker
+     */
+    CHUNK_REPLICA_REPLY((byte)0x10),
+
     /**
      * file meta sync
      * from queen to worker
      */
-    SYNC((byte)0x11);
+    META_SYNC((byte)0x11),
+
+    /**
+     * file meta sync reply
+     * from worker to queen
+     */
+    META_SYNC_REPLY((byte)0x12);
 }
 ```
 
@@ -96,11 +151,11 @@ LOGGER.info("WorkerServer Startup at port:{}", node.getPort());
 Channel channel = future.channel();
 // schedule a heartbeat runnable
 channel.eventLoop().scheduleAtFixedRate(new HeartbeatClient(),0, Constants.HEART_BEAT_PERIOD,TimeUnit.SECONDS);
-LOGGER.info("HeartbeatClient has scheduled");
+LOGGER.info("HeartBeatClient has scheduled");
 ```
-HeartbeatClient实际是一个Runnable，具体的工作就是连接上Queen之后，向Queen发送HeartBeat的Packet，具体的核心代码如下：
+HeartBeatClient实际是一个Runnable，具体的工作就是连接上Queen之后，向Queen发送HeartBeat的Packet，具体的核心代码如下：
 ``` java
-public HeartbeatClient(){
+public HeartBeatClient(){
     if(discovery==null){
         LOGGER.warn("discovery is null,can't get queenNode");
         return;

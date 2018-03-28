@@ -8,12 +8,10 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.http.HttpContentCompressor;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
-import io.netty.handler.stream.ChunkedWriteHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.concurrent.DefaultThreadFactory;
 import org.slf4j.Logger;
@@ -67,7 +65,7 @@ public final class QueenServer {
             pipeline.addLast(new PacketEncoder());
             pipeline.addLast(new QueenServerHandler());
             pipeline.addLast(new IdleStateHandler(Constants.READ_IDLE_TIME_OUT, Constants.WRITE_IDLE_TIME_OUT, Constants.ALL_IDLE_TIME_OUT, TimeUnit.SECONDS));
-            pipeline.addLast(new HeartbeatServerHandler());
+            pipeline.addLast(new HeartBeatServerHandler());
         }
     }
 
