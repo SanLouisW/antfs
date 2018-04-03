@@ -8,6 +8,7 @@ import io.antfs.warehouse.NodeWareHouse;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.timeout.IdleStateEvent;
+import io.netty.util.ReferenceCountUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,24 +39,17 @@ public class HeartBeatServerHandler extends ChannelInboundHandlerAdapter {
 
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-		LOGGER.info("[HeartBeatServerHandler] channelRead msg={}",msg);
 		if(msg instanceof Packet){
 			Packet packet = (Packet)msg;
 			// handle heart beat
-			if(packet.getHeader().getPacketType()== PacketType.HEART_BEAT.getType()){
-				Node workerNode = parseNode(ctx);
-				LOGGER.info("A new worker={} has connected to queen,will add it to NodeWareHouse",workerNode);
-				if(workerNode==null) {
-					LOGGER.error("workerNode parse from ctx is null");
-					return;
-				}
-				String id = workerNode.getId();
-				if(!NodeWareHouse.nodeExists(id)){
-					LOGGER.debug("Worker={} send Queen a msg={}",ctx.channel().remoteAddress(),msg.toString());
-					NodeWareHouse.addNode(id, workerNode);
-				}
-				idleCounter = 0;
+			if(packet.getHeader().getPacketType()==PacketType.HEART_BEAT.getType()){
+				handleHeartBeat(ctx,packet);
+				ReferenceCountUtil.release(msg);
+			}else{
+				ctx.fireChannelRead(msg);
 			}
+		}else{
+			ctx.fireChannelRead(msg);
 		}
 	}
 
@@ -97,6 +91,21 @@ public class HeartBeatServerHandler extends ChannelInboundHandlerAdapter {
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 		LOGGER.error("HeartBeatServerHandler caught exception,cause:{}", cause);
 		ctx.close();
+	}
+
+	private void handleHeartBeat(ChannelHandlerContext ctx,Packet packet){
+		LOGGER.info("Worker={} send Queen a heart beat packet",ctx.channel().remoteAddress());
+		Node workerNode = parseNode(ctx);
+		if(workerNode==null) {
+			LOGGER.error("workerNode parse from ctx is null");
+			return;
+		}
+		String id = workerNode.getId();
+		if(!NodeWareHouse.nodeExists(id)){
+			LOGGER.info("A new worker={} has connected to queen,will add it to NodeWareHouse",workerNode);
+			NodeWareHouse.addNode(id, workerNode);
+		}
+		idleCounter = 0;
 	}
 
 }

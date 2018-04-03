@@ -3,22 +3,33 @@ package io.antfs.colony.queen;
 import com.alibaba.fastjson.JSONObject;
 import com.xiaoleilu.hutool.util.CollectionUtil;
 import com.xiaoleilu.hutool.util.StrUtil;
+import io.antfs.colony.node.Node;
 import io.antfs.common.Constants;
+import io.antfs.common.lang.chunk.FileToChunkSpliter;
+import io.antfs.common.lang.object.DistributedAntMetaObject;
+import io.antfs.common.util.FileUtil;
 import io.antfs.common.util.HttpRenderUtil;
 import io.antfs.common.util.HttpRequestUtil;
 import io.antfs.protocol.PacketType;
 import io.antfs.protocol.Packet;
+import io.antfs.warehouse.NodeWareHouse;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.*;
+import io.netty.handler.timeout.IdleStateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.CONTINUE;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
@@ -33,6 +44,7 @@ public class QueenServerHandler extends ChannelInboundHandlerAdapter {
     private static final Logger LOGGER = LoggerFactory.getLogger(QueenServerHandler.class);
     private static final String TIP = Constants.QUEEN_POST_URI_TIP.toJSONString();
     private ChannelHandlerContext ctx;
+
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
@@ -80,7 +92,21 @@ public class QueenServerHandler extends ChannelInboundHandlerAdapter {
                 if(StrUtil.isNotBlank(filePath)){
                     File file = new File(filePath);
                     if(file.exists() && file.isFile()){
+                        String fid = FileUtil.getCRC32(file);
+                        FileToChunkSpliter spliter = new FileToChunkSpliter(ctx,file,fid,Constants.ANT_OBJECT_BUFFER_SIZE);
+                        ScheduledFuture<DistributedAntMetaObject> scheduledFuture = ctx.channel().eventLoop().schedule(spliter,0, TimeUnit.SECONDS);
+                        if(scheduledFuture.isDone()){
+                            try {
+                                DistributedAntMetaObject distributedAntMetaObject = scheduledFuture.get();
+                            } catch (InterruptedException | ExecutionException e) {
+                                e.printStackTrace();
+                            }
+                        }
 
+                        JSONObject object = new JSONObject();
+                        object.put("fid",fid);
+                        responseJSON(object.toJSONString());
+                        return;
                     }else{
                         responseError("file=["+filePath+"] does not exists!");
                         return;
@@ -96,13 +122,14 @@ public class QueenServerHandler extends ChannelInboundHandlerAdapter {
             }
         }
         responseJSON(TIP);
-
     }
+
+
 
     private void handlePacket(ChannelHandlerContext ctx,Packet packet){
         // TODO handle common packet
-        QueenPacketSender packetSender = new QueenPacketSender(ctx, packet);
-        packetSender.sendPacket();
+//        AbstractPacketSender packetSender = new AbstractPacketSender(ctx, packet);
+//        packetSender.sendPacket();
     }
 
     private void responseError(String error){

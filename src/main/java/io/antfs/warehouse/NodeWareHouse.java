@@ -76,6 +76,6 @@ public class NodeWareHouse {
      * print current nodes
      */
     private static void showCurrentNodes(){
-        LOGGER.info("Current Nodes={},size={}",nodeMap,nodeMap.size());
+        LOGGER.debug("Current Nodes={},size={}",nodeMap,nodeMap.size());
     }
 }

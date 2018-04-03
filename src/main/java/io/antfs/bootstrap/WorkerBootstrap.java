@@ -35,6 +35,8 @@ public class WorkerBootstrap {
 
         // register current worker node to zk
         DefaultRegister.create(zkServerAddress).register(node);
+        // store the current node
+        Node.CurrentNode.set(node);
 
         // start the worker server
         WorkerServer workerServer = new WorkerServer();

@@ -79,4 +79,25 @@ public class Node {
         return JSON.toJSONString(this);
     }
 
+    public static class CurrentNode {
+        private static volatile Node current;
+
+        public static void set(Node node){
+            Node tmpNode = current;
+            if(tmpNode==null){
+                synchronized (CurrentNode.class){
+                    tmpNode = current;
+                    if(tmpNode==null){
+                        tmpNode = current = node;
+                    }
+                }
+            }
+        }
+
+        public static Node get(){
+            return current;
+        }
+    }
+
+
 }

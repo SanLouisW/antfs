@@ -75,8 +75,8 @@ public class Packet {
         public byte getPacketType() {
             return packetType;
         }
-        public void setPacketType(PacketType packetType) {
-            this.packetType = packetType.getType();
+        public void setPacketType(byte packetType) {
+            this.packetType = packetType;
         }
         public int getLen() {
             return len;

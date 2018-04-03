@@ -27,7 +27,6 @@ public enum PacketType {
 
     /**
      * chunk store
-     * from client to queen
      * from queen to worker
      */
     CHUNK_STORE((byte)0x03),
@@ -35,7 +34,6 @@ public enum PacketType {
     /**
      * chunk store reply
      * from worker to queen
-     * from queen to client
      */
     CHUNK_STORE_REPLY((byte)0x04),
 
@@ -53,7 +51,6 @@ public enum PacketType {
 
     /**
      * chunk restore
-     * from client to queen
      * from queen to worker
      */
     CHUNK_RESTORE((byte)0x07),
@@ -61,7 +58,6 @@ public enum PacketType {
     /**
      * chunk restore reply
      * from worker to queen
-     * from queen to client
      */
     CHUNK_RESTORE_REPLY((byte)0x08),
 

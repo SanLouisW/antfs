@@ -22,21 +22,25 @@ import org.slf4j.LoggerFactory;
  * @author gris.wang
  * @since 2017/11/20
  **/
+@ChannelHandler.Sharable
 public class HeartBeatClient extends ChannelInboundHandlerAdapter implements Runnable{
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HeartBeatClient.class);
 
     private static Discovery discovery;
     private static Node queenNode;
+    private static EventLoopGroup group;
     static{
         discovery = DefaultDiscovery.create(ZkServer.getZkAddress());
         queenNode = discovery.discoveryQueen();
+        group = new NioEventLoopGroup();
     }
 
     private static final int MAX_RETRY = 3;
-    private static Channel channel;
+    private Channel channel;
 
     public HeartBeatClient(){
+        LOGGER.info("Create HeartBeatClient");
         if(discovery==null){
             LOGGER.warn("discovery is null,can't get queenNode");
             return;
@@ -56,6 +60,7 @@ public class HeartBeatClient extends ChannelInboundHandlerAdapter implements Run
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        channel = null;
         LOGGER.info("Queen Server is inactive,will reconnect after 10s");
         Thread.sleep(10 * 1000);
         connect();
@@ -88,26 +93,25 @@ public class HeartBeatClient extends ChannelInboundHandlerAdapter implements Run
     }
 
     private void doConnect(){
-        EventLoopGroup group = new NioEventLoopGroup();
+        Bootstrap bootstrap = new Bootstrap();
+        bootstrap.group(group);
+        bootstrap.channel(NioSocketChannel.class);
+        bootstrap.handler(new ChannelInitializer<SocketChannel>() {
+            @Override
+            public void initChannel(SocketChannel channel) throws Exception {
+                ChannelPipeline pipeline = channel.pipeline();
+                pipeline.addLast(new PacketEncoder());
+                pipeline.addLast(new PacketDecoder(Constants.MAX_FRAME_LENGTH,Constants.LENGTH_FIELD_OFFSET,Constants.LENGTH_FIELD_LENGTH,Constants.LENGTH_ADJUSTMENT, Constants.INITIAL_BYTES_TO_STRIP));
+                pipeline.addLast(HeartBeatClient.this);
+            }
+        });
+        bootstrap.option(ChannelOption.TCP_NODELAY, true);
+        // doConnect to queen server
         try {
-            Bootstrap bootstrap = new Bootstrap();
-            bootstrap.group(group);
-            bootstrap.channel(NioSocketChannel.class);
-            bootstrap.handler(new ChannelInitializer<SocketChannel>() {
-                @Override
-                public void initChannel(SocketChannel channel) throws Exception {
-                    ChannelPipeline pipeline = channel.pipeline();
-                    pipeline.addLast(new PacketEncoder());
-                    pipeline.addLast(new PacketDecoder(Constants.MAX_FRAME_LENGTH,Constants.LENGTH_FIELD_OFFSET,Constants.LENGTH_FIELD_LENGTH,Constants.LENGTH_ADJUSTMENT, Constants.INITIAL_BYTES_TO_STRIP));
-                    pipeline.addLast(HeartBeatClient.this);
-                }
-            });
-            bootstrap.option(ChannelOption.TCP_NODELAY, true);
-            // doConnect to queen server
-            ChannelFuture future = bootstrap.connect(queenNode.getHost(), queenNode.getPort()).sync();
-            channel = future.channel();
-        }catch(InterruptedException e){
-            LOGGER.error("HeartBeatClient doConnect to queen error,cause:",e);
+            channel = bootstrap.connect(queenNode.getHost(), queenNode.getPort()).sync().channel();
+            LOGGER.info("HeartBeatClient doConnect to queen server [host:{},port:{}] success",queenNode.getHost(),queenNode.getPort());
+        } catch (InterruptedException e) {
+            LOGGER.error("HeartBeatClient doConnect to queen server [host:{},port:{}] error,cause:",queenNode.getHost(),queenNode.getPort(),e);
         }
     }
 
@@ -115,12 +119,12 @@ public class HeartBeatClient extends ChannelInboundHandlerAdapter implements Run
      * send heart beat packet to queen server
      */
     private void heartBeat() {
-        if(channel==null){
+        if(channel ==null){
             LOGGER.warn("channel is null,can't send a heart beat packet to queen");
             return;
         }
         Packet packet = Packet.HEART_BEAT_PACKET;
-        LOGGER.debug("worker send heart beat packet to queen with packet={},remoteAddress={}",packet,channel.remoteAddress());
+        LOGGER.info("Current Worker Node send heart beat packet to Queen={}",channel.remoteAddress());
         channel.writeAndFlush(packet);
     }
 
