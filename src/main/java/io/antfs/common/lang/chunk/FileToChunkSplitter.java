@@ -26,9 +26,9 @@ import java.util.concurrent.*;
  * @author gris.wang
  * @since 2018/3/28
  **/
-public class FileToChunkSpliter implements Callable<DistributedAntMetaObject> {
+public class FileToChunkSplitter implements Callable<DistributedAntMetaObject> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FileToChunkSpliter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileToChunkSplitter.class);
 
     private ChannelHandlerContext ctx;
     private QueenPacketSender sender;
@@ -41,7 +41,7 @@ public class FileToChunkSpliter implements Callable<DistributedAntMetaObject> {
     private CountDownLatch countDownLatch;
     private DistributedAntMetaObject distributedAntMetaObject;
 
-    public FileToChunkSpliter(ChannelHandlerContext ctx,File file, String fid, int bufferSize){
+    public FileToChunkSplitter(ChannelHandlerContext ctx, File file, String fid, int bufferSize){
         this.ctx = ctx;
         this.sender = new QueenPacketSender(ctx.channel());
         this.fileLength = file.length();
@@ -70,15 +70,15 @@ public class FileToChunkSpliter implements Callable<DistributedAntMetaObject> {
 
         final long startTime = System.currentTimeMillis();
         for(ReadPointer readPointer: this.readPointers){
-            this.executorService.execute(new Spliter(readPointer));
+            this.executorService.execute(new Splitter(readPointer));
         }
         try {
-            // wait for all Spliter finish their job
+            // wait for all Splitter finish their job
             countDownLatch.await();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        // all Spliter has finished
+        // all Splitter has finished
         LOGGER.info("total cost time=({}ms)",(System.currentTimeMillis()-startTime));
         shutdown();
         LOGGER.info("distributedAntMetaObject={}",distributedAntMetaObject);
@@ -162,16 +162,16 @@ public class FileToChunkSpliter implements Callable<DistributedAntMetaObject> {
     }
 
 
-    private class Spliter implements Runnable{
+    private class Splitter implements Runnable{
 
         private ReadPointer readPointer;
         private byte[] readBuff;
 
         /**
-         * Spliter
+         * Splitter
          * @param readPointer the ReadPointer
          */
-        Spliter(ReadPointer readPointer) {
+        Splitter(ReadPointer readPointer) {
             this.readPointer = readPointer;
             this.readBuff = new byte[bufferSize];
         }
@@ -202,7 +202,7 @@ public class FileToChunkSpliter implements Callable<DistributedAntMetaObject> {
                 }
 
             }catch (Exception e) {
-                LOGGER.error("Spliter error,cause:",e);
+                LOGGER.error("Splitter error,cause:",e);
             }finally {
                 countDownLatch.countDown();
             }

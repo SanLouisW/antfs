@@ -2,8 +2,8 @@ package io.antfs.colony.queen;
 
 import io.antfs.colony.node.Node;
 import io.antfs.common.Constants;
-import io.antfs.protocol.PacketType;
 import io.antfs.protocol.Packet;
+import io.antfs.protocol.PacketType;
 import io.antfs.warehouse.NodeWareHouse;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -26,24 +26,13 @@ public class HeartBeatServerHandler extends ChannelInboundHandlerAdapter {
 
 	private int idleCounter;
 
-	private Node parseNode(ChannelHandlerContext ctx){
-		SocketAddress remoteAddress = ctx.channel().remoteAddress();
-		if(remoteAddress instanceof InetSocketAddress){
-			InetSocketAddress inetSocketAddress = (InetSocketAddress)remoteAddress;
-			String host = inetSocketAddress.getHostString();
-			int port = inetSocketAddress.getPort();
-			return new Node(host,port);
-		}
-		return null;
-	}
-
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 		if(msg instanceof Packet){
 			Packet packet = (Packet)msg;
 			// handle heart beat
 			if(packet.getHeader().getPacketType()==PacketType.HEART_BEAT.getType()){
-				handleHeartBeat(ctx,packet);
+				handleHeartBeat(ctx);
 				ReferenceCountUtil.release(msg);
 			}else{
 				ctx.fireChannelRead(msg);
@@ -93,8 +82,8 @@ public class HeartBeatServerHandler extends ChannelInboundHandlerAdapter {
 		ctx.close();
 	}
 
-	private void handleHeartBeat(ChannelHandlerContext ctx,Packet packet){
-		LOGGER.info("Worker={} send Queen a heart beat packet",ctx.channel().remoteAddress());
+	private void handleHeartBeat(ChannelHandlerContext ctx){
+		LOGGER.debug("Worker={} send Queen a heart beat packet",ctx.channel().remoteAddress());
 		Node workerNode = parseNode(ctx);
 		if(workerNode==null) {
 			LOGGER.error("workerNode parse from ctx is null");
@@ -108,4 +97,14 @@ public class HeartBeatServerHandler extends ChannelInboundHandlerAdapter {
 		idleCounter = 0;
 	}
 
+	private Node parseNode(ChannelHandlerContext ctx){
+		SocketAddress remoteAddress = ctx.channel().remoteAddress();
+		if(remoteAddress instanceof InetSocketAddress){
+			InetSocketAddress inetSocketAddress = (InetSocketAddress)remoteAddress;
+			String host = inetSocketAddress.getHostString();
+			int port = inetSocketAddress.getPort();
+			return new Node(host,port);
+		}
+		return null;
+	}
 }

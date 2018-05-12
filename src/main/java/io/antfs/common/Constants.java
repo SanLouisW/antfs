@@ -14,8 +14,10 @@ public class Constants {
     private static final String ANT_FS_PROPERTIES_PATH = "/antfs.properties";
     private static final PropertiesUtil ANT_FS_PROPERTIES = PropertiesUtil.getInstance(ANT_FS_PROPERTIES_PATH);
 
-    /** Queen Server Port */
-    public static final int QUEEN_PORT = ANT_FS_PROPERTIES.getInt("queen.server.port",8889);
+    /** Queen server port */
+    public static final int QUEEN_PORT = ANT_FS_PROPERTIES.getInt("queen.server.port",8800);
+    /** Queen http server port */
+    public static final int QUEEN_HTTP_PORT = ANT_FS_PROPERTIES.getInt("queen.http.server.port",8900);
     /** BossGroup Size */
     public static final int BOSS_GROUP_SIZE = null!=Integer.getInteger("server.bossGroup.size")?Integer.getInteger("server.bossGroup.size"):ANT_FS_PROPERTIES.getInt("server.bossGroup.size",1);
     /** WorkerGroup Size */
